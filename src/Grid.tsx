@@ -6,17 +6,19 @@ import {
   useMemo,
   useState,
 } from "react";
-import { GRID, sourceDiamensions } from "./config";
+import { SUBDIVISION, sourceDiamensions } from "./config";
 import { GridCell } from "./GridCell";
 type Props = {
   canvasSize: [number, number];
 };
 export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
-  const [mouseTranslate, setMouseTranslation] = useState([0, 0]);
+  const [mouseTranslate, setMouseTranslation] = useState<[number, number]>([
+    0, 0,
+  ]);
   const [gridPosition, setGridPosition] = useState([0, 0]);
   const [cellWidth, setCellWidth] = useState(0);
   const [cellHeight, setCellHeight] = useState(0);
-  const [heightGrid, setHeightGrid] = useState(GRID);
+  const [heightGrid, setHeightGrid] = useState(SUBDIVISION);
 
   const changeTranslate = useCallback((e) => {
     setMouseTranslation([e.pageX, e.pageY]);
@@ -36,7 +38,7 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
   }, [changeTranslate, getInitialMousePosition]);
 
   useEffect(() => {
-    const gridCellWidth = canvasSize[0] / GRID;
+    const gridCellWidth = canvasSize[0] / SUBDIVISION;
     const gridCellHeight =
       (sourceDiamensions[1] / sourceDiamensions[0]) * gridCellWidth;
     setCellWidth(gridCellWidth);
@@ -53,7 +55,7 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
 
     for (let u = 0; u < heightGrid; u++) {
       const rowArray = [] as number[];
-      for (let v = 0; v < GRID; v++) {
+      for (let v = 0; v < SUBDIVISION; v++) {
         rowArray.push(1);
       }
       gridList.push(rowArray);
@@ -74,7 +76,7 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
                   x={x}
                   y={y}
                   key={`${x}${y}`}
-                  
+                  mouseTranslate={mouseTranslate}
                 />
               );
             })}

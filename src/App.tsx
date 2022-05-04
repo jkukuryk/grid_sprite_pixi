@@ -1,4 +1,4 @@
-import { Container, Stage } from "@inlet/react-pixi";
+import {  Stage } from "@inlet/react-pixi";
 import { useCallback, useEffect, useState } from "react";
 import { Grid } from "./Grid";
 

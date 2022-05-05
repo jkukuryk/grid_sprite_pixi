@@ -1,4 +1,6 @@
-import { Container } from "@inlet/react-pixi";
+import { Container, Text } from "@inlet/react-pixi";
+import { TextStyle } from "pixi.js";
+import { Loader } from "@pixi/loaders";
 import {
   FunctionComponent,
   useCallback,
@@ -6,8 +8,10 @@ import {
   useMemo,
   useState,
 } from "react";
-import { SUBDIVISION, sourceDiamensions } from "./config";
+import { SUBDIVISION } from "./config";
 import { GridCell } from "./GridCell";
+import source from "./assets/source.jpg";
+
 type Props = {
   canvasSize: [number, number];
 };
@@ -19,6 +23,7 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
   const [cellWidth, setCellWidth] = useState(0);
   const [cellHeight, setCellHeight] = useState(0);
   const [heightGrid, setHeightGrid] = useState(SUBDIVISION);
+  const [sourceDiamensions, setSourceDiamensions] = useState([0, 0]);
 
   const changeTranslate = useCallback((e) => {
     setMouseTranslation([e.pageX, e.pageY]);
@@ -32,6 +37,20 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
   useEffect(() => {
     document.addEventListener("mousemove", changeTranslate);
     // document.addEventListener("mouseover", getInitialMousePosition);
+    const loader = new Loader();
+    loader.add(source);
+    loader.load((res) => {
+      try {
+        const sourceKey = Object.keys(res.resources)[0];
+        const sourceLoaded = res.resources[sourceKey];
+        setSourceDiamensions([
+          sourceLoaded.data.width,
+          sourceLoaded.data.height,
+        ]);
+      } catch (error) {
+        console.error("error while loading sprite", error);
+      }
+    });
     return () => {
       document.removeEventListener("mousemove", changeTranslate);
     };
@@ -48,7 +67,7 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
     const positionTop =
       gridCellHeight / 2 - (gridHeight * gridCellHeight - canvasSize[1]) / 2;
     setGridPosition([gridCellWidth / 2, positionTop]);
-  }, [canvasSize, heightGrid]);
+  }, [canvasSize, heightGrid, sourceDiamensions]);
 
   const gridMap = useMemo(() => {
     const gridList = [] as number[][];
@@ -65,24 +84,44 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
 
   return (
     <Container position={[gridPosition[0], gridPosition[1]]}>
-      {gridMap.map((row, y) => {
-        return (
-          <Container key={y}>
-            {row.map((cell, x) => {
-              return (
-                <GridCell
-                  width={cellWidth}
-                  height={cellHeight}
-                  x={x}
-                  y={y}
-                  key={`${x}${y}`}
-                  mouseTranslate={mouseTranslate}
-                />
-              );
-            })}
-          </Container>
-        );
-      })}
+      {cellWidth ? (
+        <>
+          {gridMap.map((row, y) => {
+            return (
+              <Container key={y}>
+                {row.map((cell, x) => {
+                  return (
+                    <GridCell
+                      width={cellWidth}
+                      height={cellHeight}
+                      x={x}
+                      y={y}
+                      key={`${x}${y}`}
+                      mouseTranslate={mouseTranslate}
+                      source={source}
+                    />
+                  );
+                })}
+              </Container>
+            );
+          })}
+        </>
+      ) : (
+        <Text
+          text="Loading..."
+          anchor={0.5}
+          position={[canvasSize[0] / 2, canvasSize[1] / 2]}
+          style={
+            new TextStyle({
+              align: "center",
+              fontFamily: '"Source Sans Pro", Helvetica, sans-serif',
+              fontSize: 50,
+              fontWeight: "bold",
+              fill: "#3b3535", // gradient
+            })
+          }
+        />
+      )}
     </Container>
   );
 };

@@ -1409,10 +1409,22 @@
   "resolved" "https://registry.npmjs.org/@pixi/constants/-/constants-6.3.0.tgz"
   "version" "6.3.0"
 
+"@pixi/constants@6.3.2":
+  "integrity" "sha512-sUE8QEJNl4vWUybS0YqpVUBWoOyLkr5bSj1+3mpmbWJTMVmLB2voFXo7XpSNCBlLH1SBN5flcgJlUWOCgNyATg=="
+  "resolved" "https://registry.npmjs.org/@pixi/constants/-/constants-6.3.2.tgz"
+  "version" "6.3.2"
+
 "@pixi/core@6.3.0":
   "integrity" "sha512-j7UMizcgDoUB9eDrZIP22xJCPYpjx2/BCl8deE5M9Cim9OR2qPxnNnt3jC1oKf2vVnNMTDrMOLekhMVo89FX2Q=="
   "resolved" "https://registry.npmjs.org/@pixi/core/-/core-6.3.0.tgz"
   "version" "6.3.0"
+  dependencies:
+    "@types/offscreencanvas" "^2019.6.4"
+
+"@pixi/core@6.3.2":
+  "integrity" "sha512-91Fw0CbFpPtMKo5TG1wdaZGgR99lX87l15F7kgge7FM7ZR4EghLiJHU8whQ19f/UNOd8AG7mHD84lUB1VXXfoA=="
+  "resolved" "https://registry.npmjs.org/@pixi/core/-/core-6.3.2.tgz"
+  "version" "6.3.2"
   dependencies:
     "@types/offscreencanvas" "^2019.6.4"
 
@@ -1466,6 +1478,11 @@
   "resolved" "https://registry.npmjs.org/@pixi/interaction/-/interaction-6.3.0.tgz"
   "version" "6.3.0"
 
+"@pixi/loaders@^6.3.2":
+  "integrity" "sha512-kkm1pynWTslQsh+h+Tw17MdeRMQ37Ht72xiZetyWbxadRAnzj+x1I9juEKEFK62mw8K/bGBcNPhu7edgmQwkvw=="
+  "resolved" "https://registry.npmjs.org/@pixi/loaders/-/loaders-6.3.2.tgz"
+  "version" "6.3.2"
+
 "@pixi/loaders@6.3.0":
   "integrity" "sha512-FXW3DkcAg2w0FABS6ixmzJNQSdabHXWumltelYM76NmBSE8oaLmg6tniBvjrTlSxUs3HlgwdeqgnUHV9GIFxLQ=="
   "resolved" "https://registry.npmjs.org/@pixi/loaders/-/loaders-6.3.0.tgz"
@@ -1475,6 +1492,11 @@
   "integrity" "sha512-QkF9wl3/kXvthwWhrDAVgWQWl3T9dbyicHsoWfx0s9b3E0rx+PZcpz5ftaAVxGd7EvecIxV9nEUnna9TIjvwJQ=="
   "resolved" "https://registry.npmjs.org/@pixi/math/-/math-6.3.0.tgz"
   "version" "6.3.0"
+
+"@pixi/math@6.3.2":
+  "integrity" "sha512-REXrCKQaT2shJ3p2Rpq1ZYV4iUeAOUFKnLN2KteQWtB5HQpB8b+w5xBGI+TcnY0FUhx92fbKPYTTvCftNZF4Jw=="
+  "resolved" "https://registry.npmjs.org/@pixi/math/-/math-6.3.2.tgz"
+  "version" "6.3.2"
 
 "@pixi/mesh-extras@6.3.0":
   "integrity" "sha512-rGvpW/UDNPDSALocT2w3jvBpF9TUgyvZMGcxqolIxDbrmRiyUeT1EeYnCQpIqQUnkKW1QKxLpuSjut2yfERe7A=="
@@ -1524,10 +1546,22 @@
   "resolved" "https://registry.npmjs.org/@pixi/runner/-/runner-6.3.0.tgz"
   "version" "6.3.0"
 
+"@pixi/runner@6.3.2":
+  "integrity" "sha512-Sspv4VTiV51GwoIg+WudHZHpT3ad5ukW20OLOR+eDOSLbgQEMfj4cTVRg27TvM/QZ/5LxeN3FqwWV+kiWpqCnw=="
+  "resolved" "https://registry.npmjs.org/@pixi/runner/-/runner-6.3.2.tgz"
+  "version" "6.3.2"
+
 "@pixi/settings@6.3.0":
   "integrity" "sha512-UkbZmlexr6NGM6Qz30Et63bpWAmpmkknOOnavrhWPnnbhFIx4kVzU9mvGMHGSGNLJabX9+gFUdjDGSlzF42v4w=="
   "resolved" "https://registry.npmjs.org/@pixi/settings/-/settings-6.3.0.tgz"
   "version" "6.3.0"
+  dependencies:
+    "ismobilejs" "^1.1.0"
+
+"@pixi/settings@6.3.2":
+  "integrity" "sha512-i5cLDUWFnRub3LPa3x7IzkH8MjSwPHyHWzIZKG5t8RiCfbhVfhWGEdKO9AYp8yO/xcf7AqtPK4mikXziL48tXA=="
+  "resolved" "https://registry.npmjs.org/@pixi/settings/-/settings-6.3.2.tgz"
+  "version" "6.3.2"
   dependencies:
     "ismobilejs" "^1.1.0"
 
@@ -1566,10 +1600,25 @@
   "resolved" "https://registry.npmjs.org/@pixi/ticker/-/ticker-6.3.0.tgz"
   "version" "6.3.0"
 
+"@pixi/ticker@6.3.2":
+  "integrity" "sha512-Au9IO85zCOOCz50aJALFxJ2C8gbgxvD0dSNm7A5FauanJbxDcctIyrW6I51nNyHyeLIUFEkuD2jE/DmcXsXnpw=="
+  "resolved" "https://registry.npmjs.org/@pixi/ticker/-/ticker-6.3.2.tgz"
+  "version" "6.3.2"
+
 "@pixi/utils@6.3.0":
   "integrity" "sha512-QI5wb/fDdH8DAzIMlrYS0MhG382FPMLh4s3yRtOaftiOb84LL7Syz//SC+CJAyVB0UV/Lpr+T6PiCa4eBjRDgA=="
   "resolved" "https://registry.npmjs.org/@pixi/utils/-/utils-6.3.0.tgz"
   "version" "6.3.0"
+  dependencies:
+    "@types/earcut" "^2.1.0"
+    "earcut" "^2.2.2"
+    "eventemitter3" "^3.1.0"
+    "url" "^0.11.0"
+
+"@pixi/utils@6.3.2":
+  "integrity" "sha512-VpB403kfqwXK9w7Qb6ex0aW0g6pWI/t43F2Z8CA/lAfYcN3O0XoxDucvmkLTQWsMtYn+Yf7YhAcLV5SemKwP0A=="
+  "resolved" "https://registry.npmjs.org/@pixi/utils/-/utils-6.3.2.tgz"
+  "version" "6.3.2"
   dependencies:
     "@types/earcut" "^2.1.0"
     "earcut" "^2.2.2"
@@ -4621,6 +4670,11 @@
   "integrity" "sha512-9ByhssR2fPVsNZj478qUUbKfmL0+t5BDVyjShtyZZLiK7ZDAArFFfopyOTj0M05wE2tJPisA4iTnnXl2YoPvOA=="
   "resolved" "https://registry.npmjs.org/graceful-fs/-/graceful-fs-4.2.10.tgz"
   "version" "4.2.10"
+
+"gsap@^3.10.4":
+  "integrity" "sha512-6QatdkKxXCMfvCW4rM++0RqyLQAzFX5nwl3yHS0XPgkZBkiSEY3VZVbMltrdtsbER/xZonLtyHt684wRp4erlQ=="
+  "resolved" "https://registry.npmjs.org/gsap/-/gsap-3.10.4.tgz"
+  "version" "3.10.4"
 
 "gzip-size@^6.0.0":
   "integrity" "sha512-ax7ZYomf6jqPTQ4+XCpUGyXKHk5WweS+e05MBO4/y3WJ5RkmPXNKvX+bx1behVILVwr6JSQvZAku021CHPXG3Q=="

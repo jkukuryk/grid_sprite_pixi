@@ -1,4 +1,4 @@
-import { Container, useTick } from "@inlet/react-pixi";
+import { Container } from "@inlet/react-pixi";
 import {
   FunctionComponent,
   useCallback,

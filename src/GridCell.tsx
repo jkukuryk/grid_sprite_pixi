@@ -117,17 +117,12 @@ export const GridCell: FunctionComponent<Props> = ({
     const anchorValue = useMemo(() => {
         let anchorX = anchorPosition[0] + anchorTranslation.x;
         let anchorY = anchorPosition[1] + anchorTranslation.y;
-        if (0.5 - rangeAnchor > anchorX) {
-            anchorX = 0.5 - rangeAnchor;
-        } else if (0.5 + rangeAnchor < anchorX) {
-            anchorX = 0.5 + rangeAnchor;
-        }
-
-        if (0.5 - rangeAnchor > anchorY) {
-            anchorY = 0.5 - rangeAnchor;
-        } else if (0.5 + rangeAnchor < anchorY) {
-            anchorY = 0.5 + rangeAnchor;
-        }
+        const minRange = 0.5 - rangeAnchor;
+        const maxRange = 0.5 + rangeAnchor;
+        anchorX = Math.max(anchorX, minRange);
+        anchorX = Math.min(anchorX, maxRange);
+        anchorY = Math.max(anchorY, minRange);
+        anchorY = Math.min(anchorY, maxRange);
 
         return [anchorX, anchorY];
     }, [anchorPosition, anchorTranslation.x, anchorTranslation.y, rangeAnchor]);

@@ -87,6 +87,7 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
                                             mouseTranslate={mouseTranslate}
                                             source={source}
                                             turbulenceTime={y + x * TURBULANCE_TIME_NOISE}
+                                            position={[x / row.length, y / gridMap.length]}
                                         />
                                     );
                                 })}

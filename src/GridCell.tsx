@@ -3,6 +3,7 @@ import { FunctionComponent, useCallback, useEffect, useMemo, useRef, useState } 
 import gsap from 'gsap';
 import { ZOOM_RANGE_CELLS, SCALE_MOUSE_ZOOM, SCALE_TURBULENCE, TURBULANCE_STEP_TIME } from './config';
 import { turbulence } from './turbulance';
+import { lerp } from './math';
 const ADD_SCALE = 0.03;
 const SUBTRACT_SCALE = 0.01;
 type Props = {
@@ -13,9 +14,21 @@ type Props = {
     mouseTranslate: [number, number];
     source: string;
     turbulenceTime: number;
+    position: [number, number];
 };
-export const GridCell: FunctionComponent<Props> = ({ x, y, width, height, mouseTranslate, source, turbulenceTime }) => {
+export const GridCell: FunctionComponent<Props> = ({
+    x,
+    y,
+    width,
+    height,
+    mouseTranslate,
+    source,
+    turbulenceTime,
+    position,
+}) => {
     const maskRef = useRef(null);
+    const [anchorPosition, setAnchorPosition] = useState([0.5, 0.5]);
+
     const draw = useCallback(
         (g) => {
             const w = width / 2;
@@ -64,8 +77,14 @@ export const GridCell: FunctionComponent<Props> = ({ x, y, width, height, mouseT
         const cellsRangeX = Math.max(ZOOM_RANGE_CELLS - rangeX / width, 0);
         const cellsRange = Math.max(cellsRangeY * cellsRangeX, ZOOM_RANGE_CELLS);
         const scalePrc = 1 + SCALE_TURBULENCE + (SCALE_MOUSE_ZOOM * cellsRange) / ZOOM_RANGE_CELLS;
+        //todo get this value from ... ?
+
+        const marginAnchor = SCALE_TURBULENCE * 2;
+        const anchorX = 0.5 + lerp(-marginAnchor, marginAnchor, position[0]);
+        const anchorY = 0.5 + lerp(-marginAnchor, marginAnchor, position[1]);
+        setAnchorPosition([anchorX, anchorY]);
         setScale(scalePrc);
-    }, [height, mouseTranslate, width, x, y]);
+    }, [height, mouseTranslate, position, width, x, y]);
 
     const nextTranslation = useCallback(() => {
         const currentTime = Date.now() - startTime;
@@ -89,7 +108,7 @@ export const GridCell: FunctionComponent<Props> = ({ x, y, width, height, mouseT
             <Graphics name="mask" draw={draw} ref={maskRef} scale={[1, 1]} />
             <Sprite
                 image={source}
-                anchor={0.5}
+                anchor={[anchorPosition[0], anchorPosition[1]]}
                 width={width * currentScale}
                 height={height * currentScale}
                 position={[translation.x * currentScale, translation.y * currentScale]}

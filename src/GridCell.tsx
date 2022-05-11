@@ -1,7 +1,7 @@
 import { Container, Graphics, Sprite, useTick } from '@inlet/react-pixi';
 import { FunctionComponent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { ZOOM_RANGE_CELLS, SCALE_MOUSE_ZOOM, SCALE_TURBULENCE, TURBULANCE_STEP_TIME } from './config';
+import { ZOOM_RANGE_CELLS, SCALE_MOUSE_ZOOM, SCALE_TURBULENCE, TURBULANCE_STEP_TIME, CELL_IMAGE_ZOOM } from './config';
 import { turbulence } from './turbulance';
 import { lerp } from './math';
 const ADD_SCALE = 0.03;
@@ -45,7 +45,7 @@ export const GridCell: FunctionComponent<Props> = ({
     );
     const [scale, setScale] = useState(2);
     const [, setFrame] = useState(0);
-    const [currentScale, setCurrentScale] = useState(2);
+    const [currentScale, setCurrentScale] = useState(12);
     const startTime = useMemo(() => {
         return Date.now() - turbulenceTime;
     }, [turbulenceTime]);
@@ -76,25 +76,28 @@ export const GridCell: FunctionComponent<Props> = ({
         const cellsRangeY = Math.max(ZOOM_RANGE_CELLS - rangeY / height, 0);
         const cellsRangeX = Math.max(ZOOM_RANGE_CELLS - rangeX / width, 0);
         const cellsRange = Math.max(cellsRangeY * cellsRangeX, ZOOM_RANGE_CELLS);
-        const scalePrc = 1 + SCALE_TURBULENCE + (SCALE_MOUSE_ZOOM * cellsRange) / ZOOM_RANGE_CELLS;
+        const turbulance = getTurbulance();
+        const scalePrc = 1 + turbulance + (SCALE_MOUSE_ZOOM * cellsRange) / ZOOM_RANGE_CELLS;
         //todo get this value from ... ?
 
-        const marginAnchor = SCALE_TURBULENCE * 2;
-        const anchorX = 0.5 + lerp(-marginAnchor, marginAnchor, position[0]);
-        const anchorY = 0.5 + lerp(-marginAnchor, marginAnchor, position[1]);
+        const anchorX = 0.1 + turbulance + lerp(0, 0.8 - turbulance, position[0]);
+        const anchorY = 0.1 + turbulance + lerp(0, 0.8 - turbulance, position[1]);
         setAnchorPosition([anchorX, anchorY]);
-        setScale(scalePrc);
+        setScale(Math.max(CELL_IMAGE_ZOOM, scalePrc));
+        console.log('scale', scalePrc);
     }, [height, mouseTranslate, position, width, x, y]);
 
     const nextTranslation = useCallback(() => {
         const currentTime = Date.now() - startTime;
         const targetStep = Math.ceil(currentTime / TURBULANCE_STEP_TIME) % turbulence.length;
         const diffTime = currentTime % TURBULANCE_STEP_TIME;
+        const turbulance = getTurbulance();
+
         gsap.to(translation, {
             duration: (TURBULANCE_STEP_TIME - diffTime) / 1000,
             ease: 'power1.inOut',
-            y: (-SCALE_TURBULENCE * width) / 2 + turbulence[targetStep][0] * SCALE_TURBULENCE * width,
-            x: (-SCALE_TURBULENCE * height) / 2 + turbulence[targetStep][1] * SCALE_TURBULENCE * height,
+            y: (-turbulance * width) / 2 + turbulence[targetStep][0] * turbulance * width,
+            x: (-turbulance * height) / 2 + turbulence[targetStep][1] * turbulance * height,
         }).then(nextTranslation);
     }, [height, startTime, translation, width]);
 
@@ -116,3 +119,7 @@ export const GridCell: FunctionComponent<Props> = ({
         </Container>
     );
 };
+
+function getTurbulance() {
+    return Math.min(0.2, SCALE_TURBULENCE);
+}

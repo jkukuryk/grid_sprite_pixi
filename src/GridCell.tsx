@@ -9,6 +9,8 @@ import {
     CELL_IMAGE_ZOOM,
     ADD_SCALE,
     SUBTRACT_SCALE,
+    DISPLAY,
+    DisplayMode,
 } from './config';
 import { turbulence } from './turbulance';
 import { lerp } from './math';
@@ -22,6 +24,8 @@ type Props = {
     source: string;
     turbulenceTime: number;
     position: [number, number];
+    sourceWidth: number;
+    sourceHeight: number;
 };
 export const GridCell: FunctionComponent<Props> = ({
     x,
@@ -32,6 +36,8 @@ export const GridCell: FunctionComponent<Props> = ({
     source,
     turbulenceTime,
     position,
+    sourceWidth,
+    sourceHeight,
 }) => {
     const maskRef = useRef(null);
     const [anchorPosition, setAnchorPosition] = useState([0.5, 0.5]);
@@ -88,6 +94,7 @@ export const GridCell: FunctionComponent<Props> = ({
         const scalePrc = 1 + turbulance + (SCALE_MOUSE_ZOOM * cellsRange) / ZOOM_RANGE_CELLS;
         const cellZoom = CELL_IMAGE_ZOOM - turbulance * CELL_IMAGE_ZOOM;
         const rangeAnchor = (1 - 1 / cellZoom) / 2;
+
         setRangeAnchor(rangeAnchor);
         let anchorX = 0.5 + lerp(-rangeAnchor, rangeAnchor, position[0]);
         let anchorY = 0.5 + lerp(-rangeAnchor, rangeAnchor, position[1]);
@@ -126,15 +133,26 @@ export const GridCell: FunctionComponent<Props> = ({
 
         return [anchorX, anchorY];
     }, [anchorPosition, anchorTranslation.x, anchorTranslation.y, rangeAnchor]);
-
+    const imageSize = useMemo(() => {
+        switch (DISPLAY) {
+            case DisplayMode.GRID:
+                return [width, height];
+            case DisplayMode.ROW:
+                const ratioW = width / sourceWidth;
+                return [width, sourceHeight * ratioW];
+            case DisplayMode.COLUMN:
+                const ratioH = height / sourceHeight;
+                return [sourceWidth * ratioH, height];
+        }
+    }, [height, sourceHeight, sourceWidth, width]);
     return (
         <Container mask={maskRef?.current} position={[x * width, y * height]} anchor={0.5}>
             <Graphics name="mask" draw={draw} ref={maskRef} scale={[1, 1]} />
             <Sprite
                 image={source}
                 anchor={[anchorValue[0], anchorValue[1]]}
-                width={width * currentScale}
-                height={height * currentScale}
+                width={imageSize[0] * currentScale}
+                height={imageSize[1] * currentScale}
             />
         </Container>
     );

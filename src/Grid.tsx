@@ -2,7 +2,7 @@ import { Container, Text } from '@inlet/react-pixi';
 import { TextStyle } from 'pixi.js';
 import { Loader } from '@pixi/loaders';
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
-import { SUBDIVISION, TURBULANCE_TIME_NOISE } from './config';
+import { DISPLAY, DisplayMode, SUBDIVISION, TURBULANCE_TIME_NOISE } from './config';
 import { GridCell } from './GridCell';
 import source from './assets/source.jpg';
 
@@ -14,7 +14,8 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
     const [gridPosition, setGridPosition] = useState([0, 0]);
     const [cellWidth, setCellWidth] = useState(0);
     const [cellHeight, setCellHeight] = useState(0);
-    const [heightGrid, setHeightGrid] = useState(SUBDIVISION);
+    const [heightGrid, setHeightGrid] = useState(1);
+    const [widthGrid, setWidthGrid] = useState(1);
     const [sourceDiamensions, setSourceDiamensions] = useState([0, 0]);
 
     const changeTranslate = useCallback((e) => {
@@ -46,14 +47,38 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
     }, [changeTranslate, getInitialMousePosition]);
 
     useEffect(() => {
-        const gridCellWidth = canvasSize[0] / SUBDIVISION;
-        const gridCellHeight = (sourceDiamensions[1] / sourceDiamensions[0]) * gridCellWidth;
+        let gridCellWidth = 0;
+        let gridCellHeight = 0;
+        switch (DISPLAY) {
+            case DisplayMode.GRID:
+                gridCellWidth = canvasSize[0] / SUBDIVISION;
+                gridCellHeight = (sourceDiamensions[1] / sourceDiamensions[0]) * gridCellWidth;
+                const gridHeight = Math.ceil(canvasSize[1] / gridCellHeight);
+                setHeightGrid(gridHeight);
+                setWidthGrid(SUBDIVISION);
+                const positionTop = gridCellHeight / 2 - (gridHeight * gridCellHeight - canvasSize[1]) / 2;
+                setGridPosition([gridCellWidth / 2, positionTop]);
+                break;
+            case DisplayMode.ROW:
+                gridCellWidth = canvasSize[0];
+                gridCellHeight = canvasSize[1] / SUBDIVISION;
+                setGridPosition([canvasSize[0] / 2, gridCellHeight / 2]);
+                setHeightGrid(SUBDIVISION);
+                setWidthGrid(1);
+
+                break;
+            case DisplayMode.COLUMN:
+                gridCellWidth = canvasSize[0] / SUBDIVISION;
+                gridCellHeight = canvasSize[1];
+                setGridPosition([gridCellWidth / 2, canvasSize[1] / 2]);
+                setHeightGrid(1);
+                setWidthGrid(SUBDIVISION);
+
+                break;
+        }
+
         setCellWidth(gridCellWidth);
         setCellHeight(gridCellHeight);
-        const gridHeight = Math.ceil(canvasSize[1] / gridCellHeight);
-        setHeightGrid(gridHeight);
-        const positionTop = gridCellHeight / 2 - (gridHeight * gridCellHeight - canvasSize[1]) / 2;
-        setGridPosition([gridCellWidth / 2, positionTop]);
     }, [canvasSize, heightGrid, sourceDiamensions]);
 
     const gridMap = useMemo(() => {
@@ -61,13 +86,13 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
 
         for (let u = 0; u < heightGrid; u++) {
             const rowArray = [] as number[];
-            for (let v = 0; v < SUBDIVISION; v++) {
+            for (let v = 0; v < widthGrid; v++) {
                 rowArray.push(1);
             }
             gridList.push(rowArray);
         }
         return gridList;
-    }, [heightGrid]);
+    }, [heightGrid, widthGrid]);
 
     return (
         <Container position={[gridPosition[0], gridPosition[1]]}>
@@ -88,6 +113,8 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
                                             source={source}
                                             turbulenceTime={y + x * TURBULANCE_TIME_NOISE}
                                             position={[x / row.length, y / gridMap.length]}
+                                            sourceWidth={sourceDiamensions[0]}
+                                            sourceHeight={sourceDiamensions[1]}
                                         />
                                     );
                                 })}

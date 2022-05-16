@@ -58,7 +58,7 @@ export const GridCell: FunctionComponent<Props> = ({
     );
     const [scale, setScale] = useState(2);
     const [, setFrame] = useState(0);
-    const [currentScale, setCurrentScale] = useState(12);
+    const [currentScale, setCurrentScale] = useState(SUBDIVISION);
     const startTime = useMemo(() => {
         return Date.now() - turbulenceTime;
     }, [turbulenceTime]);
@@ -113,8 +113,8 @@ export const GridCell: FunctionComponent<Props> = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     const anchorValue = useMemo(() => {
-        const turbulanceRange = 1 - getTurbulance();
-        const turbulanceStart = getTurbulance() / 2;
+        const turbulanceRange = 1 - getTurbulance() * 2;
+        const turbulanceStart = getTurbulance();
         let anchorX = turbulanceStart + (x / SUBDIVISION) * turbulanceRange;
         let anchorY = turbulanceStart + (y / SUBDIVISION) * turbulanceRange;
 
@@ -132,21 +132,24 @@ export const GridCell: FunctionComponent<Props> = ({
             case DisplayMode.GRID:
                 return [width, height];
             case DisplayMode.ROW:
-                const ratioW = width / sourceWidth;
-                return [width, sourceHeight * ratioW];
+                const cellHeight = height * Math.max(1, CELL_IMAGE_ZOOM);
+                return [width, cellHeight];
             case DisplayMode.COLUMN:
-                const ratioH = height / sourceHeight;
-                return [sourceWidth * ratioH, height];
+                const cellWidth = width * 2 * Math.max(1, CELL_IMAGE_ZOOM);
+                return [cellWidth, height];
         }
-    }, [height, sourceHeight, sourceWidth, width]);
+    }, [height, width]);
     return (
         <Container mask={maskRef?.current} position={[x * width, y * height]} anchor={0.5}>
             <Graphics name="mask" draw={draw} ref={maskRef} scale={[1, 1]} />
             <Sprite
                 image={source}
-                anchor={[anchorValue[0] + anchorTranslation.y, anchorValue[1] + anchorTranslation.x]}
-                width={imageSize[0] * currentScale}
-                height={imageSize[1] * currentScale}
+                anchor={[
+                    anchorValue[0] + (DISPLAY === DisplayMode.ROW ? 0 : anchorTranslation.y),
+                    anchorValue[1] + (DISPLAY === DisplayMode.COLUMN ? 0 : anchorTranslation.x),
+                ]}
+                width={imageSize[0] * (DISPLAY === DisplayMode.ROW ? 1 : currentScale)}
+                height={imageSize[1] * (DISPLAY === DisplayMode.COLUMN ? 1 : currentScale)}
             />
         </Container>
     );

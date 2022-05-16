@@ -11,9 +11,9 @@ import {
     SUBTRACT_SCALE,
     DISPLAY,
     DisplayMode,
+    SUBDIVISION,
 } from './config';
 import { turbulence } from './turbulance';
-import { lerp } from './math';
 
 type Props = {
     x: number;
@@ -40,9 +40,7 @@ export const GridCell: FunctionComponent<Props> = ({
     sourceHeight,
 }) => {
     const maskRef = useRef(null);
-    const [anchorPosition, setAnchorPosition] = useState([0.5, 0.5]);
     const [anchorTranslation] = useState({ x: 0, y: 0 });
-    const [rangeAnchor, setRangeAnchor] = useState(0);
 
     const draw = useCallback(
         (g) => {
@@ -93,13 +91,7 @@ export const GridCell: FunctionComponent<Props> = ({
         const turbulance = getTurbulance();
         const scalePrc = 1 + turbulance + (SCALE_MOUSE_ZOOM * cellsRange) / ZOOM_RANGE_CELLS;
         const cellZoom = CELL_IMAGE_ZOOM - turbulance * CELL_IMAGE_ZOOM;
-        const rangeAnchor = (1 - 1 / cellZoom) / 2;
 
-        setRangeAnchor(rangeAnchor);
-        let anchorX = 0.5 + lerp(-rangeAnchor, rangeAnchor, position[0]);
-        let anchorY = 0.5 + lerp(-rangeAnchor, rangeAnchor, position[1]);
-
-        setAnchorPosition([anchorX, anchorY]);
         setScale(Math.max(cellZoom, scalePrc, 1));
     }, [height, mouseTranslate, position, width, x, y]);
 
@@ -107,13 +99,12 @@ export const GridCell: FunctionComponent<Props> = ({
         const currentTime = Date.now() - startTime;
         const targetStep = Math.ceil(currentTime / TURBULANCE_STEP_TIME) % turbulence.length;
         const diffTime = currentTime % TURBULANCE_STEP_TIME;
-        const turbulance = getTurbulance();
-
+        const turbulanceRange = getTurbulance();
         gsap.to(anchorTranslation, {
             duration: (TURBULANCE_STEP_TIME - diffTime) / 1000,
             ease: 'power1.inOut',
-            y: turbulence[targetStep][0] * turbulance,
-            x: turbulence[targetStep][1] * turbulance,
+            y: (turbulence[targetStep][0] * turbulanceRange) / 2,
+            x: (turbulence[targetStep][1] * turbulanceRange) / 2,
         }).then(nextTranslation);
     }, [anchorTranslation, startTime]);
 
@@ -122,17 +113,20 @@ export const GridCell: FunctionComponent<Props> = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     const anchorValue = useMemo(() => {
-        let anchorX = anchorPosition[0] + anchorTranslation.x;
-        let anchorY = anchorPosition[1] + anchorTranslation.y;
-        const minRange = 0.5 - rangeAnchor;
-        const maxRange = 0.5 + rangeAnchor;
-        anchorX = Math.max(anchorX, minRange);
-        anchorX = Math.min(anchorX, maxRange);
-        anchorY = Math.max(anchorY, minRange);
-        anchorY = Math.min(anchorY, maxRange);
+        const turbulanceRange = 1 - getTurbulance();
+        const turbulanceStart = getTurbulance() / 2;
+        let anchorX = turbulanceStart + (x / SUBDIVISION) * turbulanceRange;
+        let anchorY = turbulanceStart + (y / SUBDIVISION) * turbulanceRange;
 
+        if (DISPLAY === DisplayMode.ROW) {
+            anchorX = 0.5;
+        }
+        if (DISPLAY === DisplayMode.COLUMN) {
+            anchorY = 0.5;
+        }
         return [anchorX, anchorY];
-    }, [anchorPosition, anchorTranslation.x, anchorTranslation.y, rangeAnchor]);
+    }, [x, y]);
+
     const imageSize = useMemo(() => {
         switch (DISPLAY) {
             case DisplayMode.GRID:
@@ -150,7 +144,7 @@ export const GridCell: FunctionComponent<Props> = ({
             <Graphics name="mask" draw={draw} ref={maskRef} scale={[1, 1]} />
             <Sprite
                 image={source}
-                anchor={[anchorValue[0], anchorValue[1]]}
+                anchor={[anchorValue[0] + anchorTranslation.y, anchorValue[1] + anchorTranslation.x]}
                 width={imageSize[0] * currentScale}
                 height={imageSize[1] * currentScale}
             />
@@ -158,6 +152,6 @@ export const GridCell: FunctionComponent<Props> = ({
     );
 };
 
-function getTurbulance() {
-    return Math.min(0.5, SCALE_TURBULENCE);
+export function getTurbulance() {
+    return Math.min(0.1, SCALE_TURBULENCE);
 }

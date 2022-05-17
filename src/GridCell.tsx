@@ -89,11 +89,10 @@ export const GridCell: FunctionComponent<Props> = ({
         const cellsRangeX = Math.max(ZOOM_RANGE_CELLS - rangeX / width, 0);
         const cellsRange = Math.max(cellsRangeY * cellsRangeX, ZOOM_RANGE_CELLS);
         const turbulance = getTurbulance();
-        const scalePrc = 1 + turbulance + (SCALE_MOUSE_ZOOM * cellsRange) / ZOOM_RANGE_CELLS;
         const cellZoom = CELL_IMAGE_ZOOM - turbulance * CELL_IMAGE_ZOOM;
-
-        setScale(Math.max(cellZoom, scalePrc, 1));
-    }, [height, mouseTranslate, position, width, x, y]);
+        const scalePrc = 1 + turbulance + (SCALE_MOUSE_ZOOM * cellsRange) / ZOOM_RANGE_CELLS;
+        setScale(max([cellZoom, scalePrc, 1 + getTurbulance() * 2]));
+    }, [height, mouseTranslate, position, sourceHeight, sourceWidth, width, x, y]);
 
     const nextTranslation = useCallback(() => {
         const currentTime = Date.now() - startTime;
@@ -117,13 +116,13 @@ export const GridCell: FunctionComponent<Props> = ({
         const turbulanceStart = getTurbulance();
         let anchorX = turbulanceStart + (x / SUBDIVISION) * turbulanceRange;
         let anchorY = turbulanceStart + (y / SUBDIVISION) * turbulanceRange;
-
         if (DISPLAY === DisplayMode.ROW) {
             anchorX = 0.5;
         }
         if (DISPLAY === DisplayMode.COLUMN) {
             anchorY = 0.5;
         }
+
         return [anchorX, anchorY];
     }, [x, y]);
 
@@ -139,15 +138,22 @@ export const GridCell: FunctionComponent<Props> = ({
                 return [cellWidth, height];
         }
     }, [height, width]);
+    const finalAnchor = useMemo(() => {
+        return [
+            anchorValue[0] + (DISPLAY === DisplayMode.ROW ? 0 : anchorTranslation.y),
+            anchorValue[1] + (DISPLAY === DisplayMode.COLUMN ? 0 : anchorTranslation.x),
+        ];
+    }, [anchorTranslation.x, anchorTranslation.y, anchorValue]);
+    const finalPosition = useMemo(() => {
+        return [-width / 2 + width * finalAnchor[0], -height / 2 + height * finalAnchor[1]];
+    }, [finalAnchor, height, width]);
     return (
-        <Container mask={maskRef?.current} position={[x * width, y * height]} anchor={0.5}>
-            <Graphics name="mask" draw={draw} ref={maskRef} scale={[1, 1]} />
+        <Container mask={maskRef?.current} position={[x * width, y * height]}>
+            <Graphics name="mask" draw={draw} ref={maskRef} />
             <Sprite
                 image={source}
-                anchor={[
-                    anchorValue[0] + (DISPLAY === DisplayMode.ROW ? 0 : anchorTranslation.y),
-                    anchorValue[1] + (DISPLAY === DisplayMode.COLUMN ? 0 : anchorTranslation.x),
-                ]}
+                position={[finalPosition[0], finalPosition[1]]}
+                anchor={[finalAnchor[0], finalAnchor[1]]}
                 width={imageSize[0] * (DISPLAY === DisplayMode.ROW ? 1 : currentScale)}
                 height={imageSize[1] * (DISPLAY === DisplayMode.COLUMN ? 1 : currentScale)}
             />
@@ -157,4 +163,17 @@ export const GridCell: FunctionComponent<Props> = ({
 
 export function getTurbulance() {
     return Math.min(0.1, SCALE_TURBULENCE);
+}
+function max(values: number[]): number {
+    let maxValue = 0;
+    values.forEach((val, key) => {
+        if (key === 0 && (val || val === 0)) {
+            maxValue = val;
+        } else {
+            if (val && maxValue < val) {
+                maxValue = val;
+            }
+        }
+    });
+    return maxValue;
 }

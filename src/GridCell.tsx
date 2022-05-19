@@ -14,6 +14,7 @@ import {
     SUBDIVISION,
 } from './config';
 import { turbulence } from './turbulance';
+import { lerp } from './math';
 
 type Props = {
     x: number;
@@ -85,24 +86,22 @@ export const GridCell: FunctionComponent<Props> = ({
         const trY = mouseTranslate[1];
         const positionY = y * height + height / 2;
         const rangeY = Math.abs(positionY - trY);
-        const cellsRangeY = Math.max(ZOOM_RANGE_CELLS - rangeY / height, 0);
-        const cellsRangeX = Math.max(ZOOM_RANGE_CELLS - rangeX / width, 0);
-        const cellsRange = Math.max(cellsRangeY * cellsRangeX, ZOOM_RANGE_CELLS);
-        const turbulance = getTurbulance();
-        const cellZoom = CELL_IMAGE_ZOOM - turbulance * CELL_IMAGE_ZOOM;
-
+        const cellsRangeY = Math.max(ZOOM_RANGE_CELLS - rangeY / height, 0) / ZOOM_RANGE_CELLS;
+        const cellsRangeX = Math.max(ZOOM_RANGE_CELLS - rangeX / width, 0) / ZOOM_RANGE_CELLS;
+        const cellsRange = Math.max(cellsRangeY * cellsRangeX);
+        const minScale = 1 + getTurbulance() * 2;
         switch (DISPLAY) {
             case DisplayMode.GRID:
-                const scalePrcG = 1 + turbulance + (SCALE_MOUSE_ZOOM * cellsRange) / ZOOM_RANGE_CELLS;
-                setScale(max([cellZoom, scalePrcG, 1 + getTurbulance() * 2]));
+                const scalePrcG = lerp(CELL_IMAGE_ZOOM, SCALE_MOUSE_ZOOM, cellsRange);
+                setScale(max([scalePrcG, minScale]));
                 break;
             case DisplayMode.COLUMN:
-                const scalePrcC = 1 + turbulance + (SCALE_MOUSE_ZOOM * cellsRangeX) / ZOOM_RANGE_CELLS;
-                setScale(max([cellZoom, scalePrcC, 1 + getTurbulance()]));
+                const scalePrcC = lerp(CELL_IMAGE_ZOOM, SCALE_MOUSE_ZOOM, cellsRangeX);
+                setScale(max([scalePrcC, minScale]));
                 break;
             case DisplayMode.ROW:
-                const scalePrcR = 1 + turbulance + (SCALE_MOUSE_ZOOM * cellsRangeY) / ZOOM_RANGE_CELLS;
-                setScale(max([cellZoom, scalePrcR, 1 + getTurbulance()]));
+                const scalePrcR = lerp(CELL_IMAGE_ZOOM, SCALE_MOUSE_ZOOM, cellsRangeY);
+                setScale(max([scalePrcR, minScale]));
                 break;
         }
     }, [height, mouseTranslate, position, sourceHeight, sourceWidth, width, x, y]);
@@ -139,18 +138,6 @@ export const GridCell: FunctionComponent<Props> = ({
         return [anchorX, anchorY];
     }, [x, y]);
 
-    const imageSize = useMemo(() => {
-        switch (DISPLAY) {
-            case DisplayMode.GRID:
-                return [width, height];
-            case DisplayMode.ROW:
-                const cellHeight = height * Math.max(1, CELL_IMAGE_ZOOM);
-                return [width, cellHeight];
-            case DisplayMode.COLUMN:
-                const cellWidth = width * Math.max(1, CELL_IMAGE_ZOOM);
-                return [cellWidth, height];
-        }
-    }, [height, width]);
     const finalAnchor = useMemo(() => {
         return [
             anchorValue[0] + (DISPLAY === DisplayMode.ROW ? 0 : anchorTranslation.y),
@@ -167,8 +154,8 @@ export const GridCell: FunctionComponent<Props> = ({
                 image={source}
                 position={[finalPosition[0], finalPosition[1]]}
                 anchor={[finalAnchor[0], finalAnchor[1]]}
-                width={imageSize[0] * (DISPLAY === DisplayMode.ROW ? 1 : currentScale)}
-                height={imageSize[1] * (DISPLAY === DisplayMode.COLUMN ? 1 : currentScale)}
+                width={width * (DISPLAY === DisplayMode.ROW ? 1 : currentScale)}
+                height={height * (DISPLAY === DisplayMode.COLUMN ? 1 : currentScale)}
             />
         </Container>
     );

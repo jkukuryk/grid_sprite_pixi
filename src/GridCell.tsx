@@ -90,8 +90,21 @@ export const GridCell: FunctionComponent<Props> = ({
         const cellsRange = Math.max(cellsRangeY * cellsRangeX, ZOOM_RANGE_CELLS);
         const turbulance = getTurbulance();
         const cellZoom = CELL_IMAGE_ZOOM - turbulance * CELL_IMAGE_ZOOM;
-        const scalePrc = 1 + turbulance + (SCALE_MOUSE_ZOOM * cellsRange) / ZOOM_RANGE_CELLS;
-        setScale(max([cellZoom, scalePrc, 1 + getTurbulance() * 2]));
+
+        switch (DISPLAY) {
+            case DisplayMode.GRID:
+                const scalePrcG = 1 + turbulance + (SCALE_MOUSE_ZOOM * cellsRange) / ZOOM_RANGE_CELLS;
+                setScale(max([cellZoom, scalePrcG, 1 + getTurbulance() * 2]));
+                break;
+            case DisplayMode.COLUMN:
+                const scalePrcC = 1 + turbulance + (SCALE_MOUSE_ZOOM * cellsRangeX) / ZOOM_RANGE_CELLS;
+                setScale(max([cellZoom, scalePrcC, 1 + getTurbulance()]));
+                break;
+            case DisplayMode.ROW:
+                const scalePrcR = 1 + turbulance + (SCALE_MOUSE_ZOOM * cellsRangeY) / ZOOM_RANGE_CELLS;
+                setScale(max([cellZoom, scalePrcR, 1 + getTurbulance()]));
+                break;
+        }
     }, [height, mouseTranslate, position, sourceHeight, sourceWidth, width, x, y]);
 
     const nextTranslation = useCallback(() => {
@@ -134,7 +147,7 @@ export const GridCell: FunctionComponent<Props> = ({
                 const cellHeight = height * Math.max(1, CELL_IMAGE_ZOOM);
                 return [width, cellHeight];
             case DisplayMode.COLUMN:
-                const cellWidth = width * 2 * Math.max(1, CELL_IMAGE_ZOOM);
+                const cellWidth = width * Math.max(1, CELL_IMAGE_ZOOM);
                 return [cellWidth, height];
         }
     }, [height, width]);

@@ -9,6 +9,8 @@ export const TURBULANCE_TIME_NOISE = 77; //difference in time between cells in m
 
 export const ADD_SCALE = 0.1;
 export const SUBTRACT_SCALE = 0.1;
+export const MAX_BLUR = 3;
+
 export enum DisplayMode {
     GRID = 'grid',
     COLUMN = 'column',

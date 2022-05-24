@@ -1409,27 +1409,27 @@
   "resolved" "https://registry.npmjs.org/@pixi/compressed-textures/-/compressed-textures-6.3.0.tgz"
   "version" "6.3.0"
 
+"@pixi/constants@^6.0.0", "@pixi/constants@6.3.2":
+  "integrity" "sha512-sUE8QEJNl4vWUybS0YqpVUBWoOyLkr5bSj1+3mpmbWJTMVmLB2voFXo7XpSNCBlLH1SBN5flcgJlUWOCgNyATg=="
+  "resolved" "https://registry.npmjs.org/@pixi/constants/-/constants-6.3.2.tgz"
+  "version" "6.3.2"
+
 "@pixi/constants@6.3.0":
   "integrity" "sha512-295/bb0+5IugA9plqBnD6xrvApjgGRdaNJ6EryCa7UB2j8wt4YtuzLjNeaCtng9eJONgJXXPhPF85+spdWRMbg=="
   "resolved" "https://registry.npmjs.org/@pixi/constants/-/constants-6.3.0.tgz"
   "version" "6.3.0"
 
-"@pixi/constants@6.3.2":
-  "integrity" "sha512-sUE8QEJNl4vWUybS0YqpVUBWoOyLkr5bSj1+3mpmbWJTMVmLB2voFXo7XpSNCBlLH1SBN5flcgJlUWOCgNyATg=="
-  "resolved" "https://registry.npmjs.org/@pixi/constants/-/constants-6.3.2.tgz"
+"@pixi/core@^6.0.0", "@pixi/core@6.3.2":
+  "integrity" "sha512-91Fw0CbFpPtMKo5TG1wdaZGgR99lX87l15F7kgge7FM7ZR4EghLiJHU8whQ19f/UNOd8AG7mHD84lUB1VXXfoA=="
+  "resolved" "https://registry.npmjs.org/@pixi/core/-/core-6.3.2.tgz"
   "version" "6.3.2"
+  dependencies:
+    "@types/offscreencanvas" "^2019.6.4"
 
 "@pixi/core@6.3.0":
   "integrity" "sha512-j7UMizcgDoUB9eDrZIP22xJCPYpjx2/BCl8deE5M9Cim9OR2qPxnNnt3jC1oKf2vVnNMTDrMOLekhMVo89FX2Q=="
   "resolved" "https://registry.npmjs.org/@pixi/core/-/core-6.3.0.tgz"
   "version" "6.3.0"
-  dependencies:
-    "@types/offscreencanvas" "^2019.6.4"
-
-"@pixi/core@6.3.2":
-  "integrity" "sha512-91Fw0CbFpPtMKo5TG1wdaZGgR99lX87l15F7kgge7FM7ZR4EghLiJHU8whQ19f/UNOd8AG7mHD84lUB1VXXfoA=="
-  "resolved" "https://registry.npmjs.org/@pixi/core/-/core-6.3.2.tgz"
-  "version" "6.3.2"
   dependencies:
     "@types/offscreencanvas" "^2019.6.4"
 
@@ -1442,6 +1442,11 @@
   "integrity" "sha512-p5d3Jx0hoIQZsn1msIOyYCzyRjVkfiDUNkuzpLmNo9zng7C6bwqmIZWEMr5alm7+XwqKHlQdsBuK9PeUJt9fGQ=="
   "resolved" "https://registry.npmjs.org/@pixi/extract/-/extract-6.3.0.tgz"
   "version" "6.3.0"
+
+"@pixi/filter-adjustment@^4.1.3":
+  "integrity" "sha512-W+NhPiZRYKoRToa5+tkU95eOw8gnS5dfIp3ZP+pLv2mdER9RI+4xHxp1uLHMqUYZViTaMdZIIoVOuCgHFPYCbQ=="
+  "resolved" "https://registry.npmjs.org/@pixi/filter-adjustment/-/filter-adjustment-4.1.3.tgz"
+  "version" "4.1.3"
 
 "@pixi/filter-alpha@6.3.0":
   "integrity" "sha512-FyO35T2ym7R/rxaQzz3+dfpMlNn7b4XCFebD7hAgYoLqb+/vaM32ZjjoKBxxFRFqpZxBO6BObCyJQd245h+P4A=="

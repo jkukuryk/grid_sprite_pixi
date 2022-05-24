@@ -1,5 +1,7 @@
-import { Container, Graphics, Sprite, useTick } from '@inlet/react-pixi';
+import { Container, Graphics, Sprite, useTick, withFilters } from '@inlet/react-pixi';
 import { FunctionComponent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import * as PIXI from 'pixi.js';
+
 import gsap from 'gsap';
 import {
     ZOOM_RANGE_CELLS,
@@ -12,6 +14,7 @@ import {
     DISPLAY,
     DisplayMode,
     SUBDIVISION,
+    MAX_BLUR,
 } from './config';
 import { turbulence } from './turbulance';
 import { lerp } from './math';
@@ -60,6 +63,7 @@ export const GridCell: FunctionComponent<Props> = ({
     const [scale, setScale] = useState(2);
     const [, setFrame] = useState(0);
     const [currentScale, setCurrentScale] = useState(SUBDIVISION);
+    const [blurScale, setBlurScale] = useState(0);
     const startTime = useMemo(() => {
         return Date.now() - turbulenceTime;
     }, [turbulenceTime]);
@@ -104,6 +108,7 @@ export const GridCell: FunctionComponent<Props> = ({
                 setScale(max([scalePrcR, minScale]));
                 break;
         }
+        setBlurScale(lerp(MAX_BLUR, 0, cellsRange));
     }, [height, mouseTranslate, position, sourceHeight, sourceWidth, width, x, y]);
 
     const nextTranslation = useCallback(() => {
@@ -147,16 +152,21 @@ export const GridCell: FunctionComponent<Props> = ({
     const finalPosition = useMemo(() => {
         return [-width / 2 + width * finalAnchor[0], -height / 2 + height * finalAnchor[1]];
     }, [finalAnchor, height, width]);
+    const Filters = withFilters(Container, {
+        blur: PIXI.filters.BlurFilter,
+    });
     return (
         <Container mask={maskRef?.current} position={[x * width, y * height]}>
             <Graphics name="mask" draw={draw} ref={maskRef} />
-            <Sprite
-                image={source}
-                position={[finalPosition[0], finalPosition[1]]}
-                anchor={[finalAnchor[0], finalAnchor[1]]}
-                width={width * (DISPLAY === DisplayMode.ROW ? 1 : currentScale)}
-                height={height * (DISPLAY === DisplayMode.COLUMN ? 1 : currentScale)}
-            />
+            <Filters blur={{ blur: blurScale }}>
+                <Sprite
+                    image={source}
+                    position={[finalPosition[0], finalPosition[1]]}
+                    anchor={[finalAnchor[0], finalAnchor[1]]}
+                    width={width * (DISPLAY === DisplayMode.ROW ? 1 : currentScale)}
+                    height={height * (DISPLAY === DisplayMode.COLUMN ? 1 : currentScale)}
+                />
+            </Filters>
         </Container>
     );
 };

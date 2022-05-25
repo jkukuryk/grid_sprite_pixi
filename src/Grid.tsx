@@ -16,7 +16,7 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
     const [cellHeight, setCellHeight] = useState(0);
     const [heightGrid, setHeightGrid] = useState(1);
     const [widthGrid, setWidthGrid] = useState(1);
-    const [sourceDiamensions, setSourceDiamensions] = useState([0, 0]);
+    const [sourceDimensions, setSourceDimensions] = useState([0, 0]);
 
     const changeTranslate = useCallback((e) => {
         setMouseTranslation([e.pageX, e.pageY]);
@@ -36,7 +36,7 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
             try {
                 const sourceKey = Object.keys(res.resources)[0];
                 const sourceLoaded = res.resources[sourceKey];
-                setSourceDiamensions([sourceLoaded.data.width, sourceLoaded.data.height]);
+                setSourceDimensions([sourceLoaded.data.width, sourceLoaded.data.height]);
             } catch (error) {
                 console.error('error while loading sprite', error);
             }
@@ -52,7 +52,7 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
         switch (DISPLAY) {
             case DisplayMode.GRID:
                 gridCellWidth = canvasSize[0] / SUBDIVISION;
-                gridCellHeight = (sourceDiamensions[1] / sourceDiamensions[0]) * gridCellWidth;
+                gridCellHeight = (sourceDimensions[1] / sourceDimensions[0]) * gridCellWidth;
                 const gridHeight = Math.ceil(canvasSize[1] / gridCellHeight);
                 setHeightGrid(gridHeight);
                 setWidthGrid(SUBDIVISION);
@@ -79,7 +79,7 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
 
         setCellWidth(gridCellWidth);
         setCellHeight(gridCellHeight);
-    }, [canvasSize, heightGrid, sourceDiamensions]);
+    }, [canvasSize, heightGrid, sourceDimensions]);
 
     const gridMap = useMemo(() => {
         const gridList = [] as number[][];
@@ -113,8 +113,8 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
                                             source={source}
                                             turbulenceTime={y + x * (DISORDER / 100) * STIR_FREQUENCY}
                                             position={[x / row.length, y / gridMap.length]}
-                                            sourceWidth={sourceDiamensions[0]}
-                                            sourceHeight={sourceDiamensions[1]}
+                                            sourceWidth={sourceDimensions[0]}
+                                            sourceHeight={sourceDimensions[1]}
                                         />
                                     );
                                 })}

@@ -5,7 +5,7 @@ import gsap from 'gsap';
 import {
     ZOOM_RANGE_CELLS,
     SCALE_MOUSE_ZOOM,
-    STIR_STRANGTH,
+    STIR_STRENGTH,
     STIR_FREQUENCY,
     CELL_IMAGE_ZOOM,
     ADD_SCALE,
@@ -16,8 +16,8 @@ import {
     STIR_FREQUENCY_BASE_TIME,
     FLIP_CELLS,
 } from './config';
-import { turbulence } from './turbulance';
 import { lerp } from './math';
+import { turbulence } from './turbulence';
 
 type Props = {
     x: number;
@@ -92,7 +92,7 @@ export const GridCell: FunctionComponent<Props> = ({
         const cellsRangeY = Math.max(ZOOM_RANGE_CELLS - rangeY / height, 0) / ZOOM_RANGE_CELLS;
         const cellsRangeX = Math.max(ZOOM_RANGE_CELLS - rangeX / width, 0) / ZOOM_RANGE_CELLS;
         const cellsRange = Math.max(cellsRangeY * cellsRangeX);
-        const minScale = 1 + getTurbulance() * 2;
+        const minScale = 1 + getTurbulence() * 2;
         switch (DISPLAY) {
             case DisplayMode.GRID:
                 const scalePrcG = lerp(CELL_IMAGE_ZOOM, SCALE_MOUSE_ZOOM, cellsRange);
@@ -110,17 +110,21 @@ export const GridCell: FunctionComponent<Props> = ({
     }, [height, mouseTranslate, position, sourceHeight, sourceWidth, width, x, y]);
 
     const nextTranslation = useCallback(() => {
-        const turbulenceStepTime = (STIR_FREQUENCY / 100) * (STIR_FREQUENCY_BASE_TIME * 1000);
-        const currentTime = Date.now() - startTime;
-        const targetStep = Math.ceil(currentTime / turbulenceStepTime) % turbulence.length;
-        const diffTime = currentTime % turbulenceStepTime;
-        const turbulanceRange = getTurbulance();
-        gsap.to(anchorTranslation, {
-            duration: (turbulenceStepTime - diffTime) / 1000,
-            ease: 'power1.inOut',
-            y: (turbulence[targetStep][0] * turbulanceRange) / 2,
-            x: (turbulence[targetStep][1] * turbulanceRange) / 2,
-        }).then(nextTranslation);
+        if (STIR_FREQUENCY > 0) {
+            const turbulenceStepTime = (STIR_FREQUENCY / 100) * (STIR_FREQUENCY_BASE_TIME * 1000);
+            const currentTime = Date.now() - startTime;
+            const targetStep = Math.ceil(currentTime / turbulenceStepTime) % turbulence.length;
+            const diffTime = currentTime % turbulenceStepTime;
+            const turbulenceRange = getTurbulence();
+            gsap.to(anchorTranslation, {
+                duration: (turbulenceStepTime - diffTime) / 1000,
+                ease: 'power1.inOut',
+                y: (turbulence[targetStep][0] * turbulenceRange) / 2,
+                x: (turbulence[targetStep][1] * turbulenceRange) / 2,
+            }).then(nextTranslation);
+        } else {
+            setTimeout(nextTranslation, 1000);
+        }
     }, [anchorTranslation, startTime]);
 
     useEffect(() => {
@@ -128,10 +132,10 @@ export const GridCell: FunctionComponent<Props> = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     const anchorValue = useMemo(() => {
-        const turbulanceRange = 1 - getTurbulance() * 2;
-        const turbulanceStart = getTurbulance();
-        let anchorX = turbulanceStart + (x / SUBDIVISION) * turbulanceRange;
-        let anchorY = turbulanceStart + (y / SUBDIVISION) * turbulanceRange;
+        const turbulenceRange = 1 - getTurbulence() * 2;
+        const turbulenceStart = getTurbulence();
+        let anchorX = turbulenceStart + (x / SUBDIVISION) * turbulenceRange;
+        let anchorY = turbulenceStart + (y / SUBDIVISION) * turbulenceRange;
         if (DISPLAY === DisplayMode.ROW) {
             anchorX = 0.5;
         }
@@ -174,9 +178,9 @@ export const GridCell: FunctionComponent<Props> = ({
         </Container>
     );
 };
-const maxTurbulance = 0.33;
-export function getTurbulance() {
-    return Math.min(0.1, (STIR_STRANGTH / 100) * maxTurbulance);
+const maxTurbulence = 0.33;
+export function getTurbulence() {
+    return Math.min(0.1, (STIR_STRENGTH / 100) * maxTurbulence);
 }
 function max(values: number[]): number {
     let maxValue = 0;

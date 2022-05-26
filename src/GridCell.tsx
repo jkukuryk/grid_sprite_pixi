@@ -122,7 +122,7 @@ export const GridCell: FunctionComponent<Props> = ({
             const turbulenceRange = getTurbulence();
             gsap.to(anchorTranslation, {
                 duration: (turbulenceStepTime - diffTime) / 1000,
-                ease: 'power4.inOut',
+                ease: 'back.inOut',
                 y: (turbulence[targetStep][0] * turbulenceRange) / 2,
                 x: (turbulence[targetStep][1] * turbulenceRange) / 2,
             }).then(nextTranslation);

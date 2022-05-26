@@ -67,7 +67,9 @@ export const GridCell: FunctionComponent<Props> = ({
     }, [turbulenceTime]);
 
     const mouseZoom = useCallback(() => {
-        const speed = lerp(0.0001, 0.1, ZOOM_SPEED / 100);
+        const maxSpeed = Math.abs(currentScale - scale) / Math.min(currentScale, scale);
+
+        const speed = lerp(0.0001, maxSpeed, ZOOM_SPEED / 100);
         if (currentScale > scale + speed) {
             setCurrentScale(currentScale - speed);
         } else if (currentScale < scale - speed) {
@@ -150,8 +152,8 @@ export const GridCell: FunctionComponent<Props> = ({
 
     const finalAnchor = useMemo(() => {
         return [
-            anchorValue[0] + (DISPLAY === DisplayMode.ROW ? 0 : anchorTranslation.y),
-            anchorValue[1] + (DISPLAY === DisplayMode.COLUMN ? 0 : anchorTranslation.x),
+            anchorValue[0] + (DISPLAY === DisplayMode.ROW ? 0 : anchorTranslation.x),
+            anchorValue[1] + (DISPLAY === DisplayMode.COLUMN ? 0 : anchorTranslation.y),
         ];
     }, [anchorTranslation.x, anchorTranslation.y, anchorValue]);
     const finalPosition = useMemo(() => {
@@ -182,7 +184,7 @@ export const GridCell: FunctionComponent<Props> = ({
 };
 const maxTurbulence = 0.5;
 export function getTurbulence() {
-    return Math.min(0, (STIR_STRENGTH / 100) * maxTurbulence);
+    return lerp(0, maxTurbulence, STIR_STRENGTH / 100);
 }
 function max(values: number[]): number {
     let maxValue = 0;
@@ -199,7 +201,7 @@ function max(values: number[]): number {
 }
 const ZOOM_MIN = 1.4;
 const ZOOM_MAX = 5;
-const ZOOM_MOUSE_MAX = 400;
+const ZOOM_MOUSE_MAX = 200000;
 
 function getImageZoom() {
     let zoom = Math.min(100, CELL_IMAGE_ZOOM);

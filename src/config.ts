@@ -1,17 +1,16 @@
-export const SUBDIVISION = 12;
+export const SUBDIVISION = 13;
 
-export const SCALE_MOUSE_ZOOM = 5;
-export const CELL_IMAGE_ZOOM = 2;
-export const ZOOM_RANGE_CELLS = 12;
+export const CELL_IMAGE_ZOOM = 1; //0 - 100
+export const SCALE_MOUSE_ZOOM = 100; //-100 - 100
+export const ZOOM_RANGE_CELLS = 13;
 
-export const STIR_FREQUENCY = 0; //0-100
-export const STIR_FREQUENCY_BASE_TIME = 4; //seconds
-export const STIR_STRENGTH = 1; //0-100
+export const STIR_FREQUENCY = 45; //0-100
+export const STIR_FREQUENCY_BASE_TIME = 12; //seconds
+export const STIR_STRENGTH = 100; //0-100
 
 export const DISORDER = 5; //0-100
 
-export const ADD_SCALE = 0.001;
-export const SUBTRACT_SCALE = 0.007;
+export const ZOOM_SPEED = 100; //0-100;
 export const FLIP_CELLS = true;
 
 export enum DisplayMode {

@@ -8,8 +8,7 @@ import {
     STIR_STRENGTH,
     STIR_FREQUENCY,
     CELL_IMAGE_ZOOM,
-    ADD_SCALE,
-    SUBTRACT_SCALE,
+    ZOOM_SPEED,
     DISPLAY,
     DisplayMode,
     SUBDIVISION,
@@ -68,10 +67,11 @@ export const GridCell: FunctionComponent<Props> = ({
     }, [turbulenceTime]);
 
     const mouseZoom = useCallback(() => {
-        if (currentScale > scale + SUBTRACT_SCALE) {
-            setCurrentScale(currentScale - SUBTRACT_SCALE);
-        } else if (currentScale < scale - ADD_SCALE) {
-            setCurrentScale(currentScale + ADD_SCALE);
+        const speed = lerp(0.0001, 0.1, ZOOM_SPEED / 100);
+        if (currentScale > scale + speed) {
+            setCurrentScale(currentScale - speed);
+        } else if (currentScale < scale - speed) {
+            setCurrentScale(currentScale + speed);
         } else {
             setCurrentScale(scale);
         }
@@ -93,17 +93,19 @@ export const GridCell: FunctionComponent<Props> = ({
         const cellsRangeX = Math.max(ZOOM_RANGE_CELLS - rangeX / width, 0) / ZOOM_RANGE_CELLS;
         const cellsRange = Math.max(cellsRangeY * cellsRangeX);
         const minScale = 1 + getTurbulence() * 2;
+        const imageZoom = getImageZoom();
+        const mouseZoom = getMouseImageZoom(imageZoom);
         switch (DISPLAY) {
             case DisplayMode.GRID:
-                const scalePrcG = lerp(CELL_IMAGE_ZOOM, SCALE_MOUSE_ZOOM, cellsRange);
+                const scalePrcG = lerp(imageZoom, mouseZoom, cellsRange);
                 setScale(max([scalePrcG, minScale]));
                 break;
             case DisplayMode.COLUMN:
-                const scalePrcC = lerp(CELL_IMAGE_ZOOM, SCALE_MOUSE_ZOOM, cellsRangeX);
+                const scalePrcC = lerp(imageZoom, mouseZoom, cellsRangeX);
                 setScale(max([scalePrcC, minScale]));
                 break;
             case DisplayMode.ROW:
-                const scalePrcR = lerp(CELL_IMAGE_ZOOM, SCALE_MOUSE_ZOOM, cellsRangeY);
+                const scalePrcR = lerp(imageZoom, mouseZoom, cellsRangeY);
                 setScale(max([scalePrcR, minScale]));
                 break;
         }
@@ -118,7 +120,7 @@ export const GridCell: FunctionComponent<Props> = ({
             const turbulenceRange = getTurbulence();
             gsap.to(anchorTranslation, {
                 duration: (turbulenceStepTime - diffTime) / 1000,
-                ease: 'power1.inOut',
+                ease: 'power4.inOut',
                 y: (turbulence[targetStep][0] * turbulenceRange) / 2,
                 x: (turbulence[targetStep][1] * turbulenceRange) / 2,
             }).then(nextTranslation);
@@ -156,12 +158,12 @@ export const GridCell: FunctionComponent<Props> = ({
         return [-width / 2 + width * finalAnchor[0], -height / 2 + height * finalAnchor[1]];
     }, [finalAnchor, height, width]);
     const flipX = useMemo(() => {
-        if (x % 2 === 0 && FLIP_CELLS) {
+        if (x % 2 !== 0 && FLIP_CELLS) {
             return -1;
         } else return 1;
     }, [x]);
     const flipY = useMemo(() => {
-        if (y % 2 === 0 && FLIP_CELLS) {
+        if (y % 2 !== 0 && FLIP_CELLS) {
             return -1;
         } else return 1;
     }, [y]);
@@ -178,9 +180,9 @@ export const GridCell: FunctionComponent<Props> = ({
         </Container>
     );
 };
-const maxTurbulence = 0.33;
+const maxTurbulence = 0.5;
 export function getTurbulence() {
-    return Math.min(0.1, (STIR_STRENGTH / 100) * maxTurbulence);
+    return Math.min(0, (STIR_STRENGTH / 100) * maxTurbulence);
 }
 function max(values: number[]): number {
     let maxValue = 0;
@@ -194,4 +196,26 @@ function max(values: number[]): number {
         }
     });
     return maxValue;
+}
+const ZOOM_MIN = 1.4;
+const ZOOM_MAX = 5;
+const ZOOM_MOUSE_MAX = 400;
+
+function getImageZoom() {
+    let zoom = Math.min(100, CELL_IMAGE_ZOOM);
+    zoom = Math.max(0, zoom);
+    return lerp(ZOOM_MIN, ZOOM_MAX, zoom / 100);
+}
+function getMouseImageZoom(imageSize: number) {
+    // imageZoom 0
+    if (SCALE_MOUSE_ZOOM > 0) {
+        return lerp(imageSize, imageSize * ZOOM_MOUSE_MAX, SCALE_MOUSE_ZOOM / 100);
+    } else {
+        const removeScale = lerp(ZOOM_MIN, ZOOM_MAX, -SCALE_MOUSE_ZOOM / 100);
+        if (imageSize - removeScale < ZOOM_MIN) {
+            return ZOOM_MIN;
+        } else {
+            return removeScale;
+        }
+    }
 }

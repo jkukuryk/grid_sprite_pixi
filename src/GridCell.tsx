@@ -56,7 +56,7 @@ export const GridCell: FunctionComponent<Props> = ({
         },
         [height, width]
     );
-    const [scale, setScale] = useState(2);
+    const [scale, setScale] = useState(1);
     const [, setFrame] = useState(0);
     const [currentScale, setCurrentScale] = useState(1);
     const baseSize = useMemo(() => {
@@ -67,11 +67,19 @@ export const GridCell: FunctionComponent<Props> = ({
     }, [height, sourceHeight, sourceWidth, width]);
 
     const anchorBase = useMemo(() => {
-        const range = 1 / SUBDIVISION;
-        const anchorX = x * range + range / 2;
-        const anchorY = y * range + range / 2;
-        return [anchorX, anchorY];
-    }, [x, y]);
+        switch (DISPLAY) {
+            case DisplayMode.GRID:
+                const range = 1 / SUBDIVISION;
+
+                const anchorX = x * range + range / 2;
+                const anchorY = y * range + range / 2;
+                return [anchorX, anchorY];
+            case DisplayMode.ROW:
+                return [0.5, lerp(0.2, 0.8, y / SUBDIVISION)];
+            case DisplayMode.COLUMN:
+                return [lerp(0.2, 0.8, x / SUBDIVISION), 0.5];
+        }
+    }, [x, y, scale]);
     const [anchorScale, setAnchorScale] = useState(1);
     const mouseZoom = useCallback(() => {
         const speed = lerp(0.000001, 1, ZOOM_SPEED / 100);
@@ -112,11 +120,11 @@ export const GridCell: FunctionComponent<Props> = ({
                 break;
             case DisplayMode.COLUMN:
                 const scalePrcC = lerp(imageZoom, mouseZoom, cellsRangeX);
-                setScale(scalePrcC);
+                setScale(scalePrcC / SUBDIVISION);
                 break;
             case DisplayMode.ROW:
                 const scalePrcR = lerp(imageZoom, mouseZoom, cellsRangeY);
-                setScale(scalePrcR);
+                setScale(scalePrcR / SUBDIVISION);
                 break;
         }
     }, [height, mouseTranslate, width, x, y]);
@@ -149,7 +157,10 @@ export const GridCell: FunctionComponent<Props> = ({
 
         const strengthX = (stepX * STIR_STRENGTH) / 100;
         const strengthY = (stepY * STIR_STRENGTH) / 100;
-        setTurbulenceAnchor([lerp(anchor[0], 1 - anchor[0], strengthX), lerp(anchor[1], 1 - anchor[1], strengthY)]);
+        setTurbulenceAnchor([
+            DISPLAY === DisplayMode.ROW ? 0.5 : lerp(anchor[0], 1 - anchor[0], strengthX),
+            DISPLAY === DisplayMode.COLUMN ? 0.5 : lerp(anchor[1], 1 - anchor[1], strengthY),
+        ]);
     }, [anchor, startTime]);
 
     const flipX = useMemo(() => {
@@ -169,8 +180,8 @@ export const GridCell: FunctionComponent<Props> = ({
             <Sprite
                 image={source}
                 anchor={[turbulenceAnchor[0], turbulenceAnchor[1]]}
-                width={baseSize[0] * (DISPLAY === DisplayMode.ROW ? 1 : currentScale)}
-                height={baseSize[1] * (DISPLAY === DisplayMode.COLUMN ? 1 : currentScale)}
+                width={baseSize[0] * currentScale}
+                height={baseSize[1] * currentScale}
             />
         </Container>
     );

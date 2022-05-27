@@ -102,6 +102,34 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
                         return (
                             <Container key={y}>
                                 {row.map((cell, x) => {
+                                    let position = [0, 0];
+                                    let translate = [0, 0];
+
+                                    if (DISPLAY === DisplayMode.GRID) {
+                                        position = [
+                                            -gridSize[0] / 2 + (x / SUBDIVISION) * gridSize[0] + cellWidth / 2,
+                                            -gridSize[1] / 2 + (y / SUBDIVISION) * gridSize[1] + cellHeight / 2,
+                                        ];
+                                        translate = [
+                                            (mouseTranslate[0] / canvasSize[0]) * gridSize[0],
+                                            (mouseTranslate[1] / canvasSize[1]) * gridSize[1],
+                                        ];
+                                    }
+
+                                    if (DISPLAY === DisplayMode.ROW) {
+                                        position[0] = 0;
+                                        position[1] =
+                                            -canvasSize[1] / 2 + (y / SUBDIVISION) * canvasSize[1] + cellHeight / 2;
+                                        translate = [...mouseTranslate];
+                                    }
+
+                                    if (DISPLAY === DisplayMode.COLUMN) {
+                                        position[1] = 0;
+                                        position[0] =
+                                            -canvasSize[0] / 2 + (x / SUBDIVISION) * canvasSize[0] + cellWidth / 2;
+                                        translate = [...mouseTranslate];
+                                    }
+
                                     return (
                                         <GridCell
                                             width={cellWidth}
@@ -109,21 +137,9 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
                                             x={x}
                                             y={y}
                                             key={`${x}${y}`}
-                                            mouseTranslate={[
-                                                (mouseTranslate[0] / canvasSize[0]) * gridSize[0],
-                                                (mouseTranslate[1] / canvasSize[1]) * gridSize[1],
-                                            ]}
+                                            mouseTranslate={[translate[0], translate[1]]}
                                             source={source}
-                                            position={[
-                                                -gridSize[0] / 2 +
-                                                    (x / (DISPLAY === DisplayMode.ROW ? 1 : SUBDIVISION)) *
-                                                        gridSize[0] +
-                                                    cellWidth / 2,
-                                                -gridSize[1] / 2 +
-                                                    (y / (DISPLAY === DisplayMode.COLUMN ? 1 : SUBDIVISION)) *
-                                                        gridSize[1] +
-                                                    cellHeight / 2,
-                                            ]}
+                                            position={[position[0], position[1]]}
                                             sourceWidth={sourceDimensions[0]}
                                             sourceHeight={sourceDimensions[1]}
                                         />

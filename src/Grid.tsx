@@ -109,7 +109,10 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
                                             x={x}
                                             y={y}
                                             key={`${x}${y}`}
-                                            mouseTranslate={mouseTranslate}
+                                            mouseTranslate={[
+                                                (mouseTranslate[0] / canvasSize[0]) * gridSize[0],
+                                                (mouseTranslate[1] / canvasSize[1]) * gridSize[1],
+                                            ]}
                                             source={source}
                                             position={[
                                                 -gridSize[0] / 2 +

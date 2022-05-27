@@ -74,7 +74,7 @@ export const GridCell: FunctionComponent<Props> = ({
     }, [x, y]);
     const [anchorScale, setAnchorScale] = useState(1);
     const mouseZoom = useCallback(() => {
-        const speed = lerp(0.000001, 0.1, ZOOM_SPEED / 100);
+        const speed = lerp(0.000001, 1, ZOOM_SPEED / 100);
         if (currentScale > scale + speed) {
             setCurrentScale(currentScale - speed);
         } else if (currentScale < scale - speed) {
@@ -119,7 +119,7 @@ export const GridCell: FunctionComponent<Props> = ({
                 setScale(scalePrcR);
                 break;
         }
-    }, [height, mouseTranslate, position, sourceHeight, sourceWidth, width, x, y]);
+    }, [height, mouseTranslate, width, x, y]);
 
     const startTime = useMemo(() => {
         const turbulenceTime = Math.random() * STIR_FREQUENCY_BASE_TIME * 1000 * (DISORDER / 100);
@@ -164,7 +164,7 @@ export const GridCell: FunctionComponent<Props> = ({
     }, [y]);
 
     return (
-        <Container mask={maskRef?.current} position={[x * width, y * height]} scale={[flipX, flipY]}>
+        <Container mask={maskRef?.current} position={[position[0], position[1]]} scale={[flipX, flipY]}>
             <Graphics name="mask" draw={draw} ref={maskRef} />
             <Sprite
                 image={source}
@@ -176,7 +176,7 @@ export const GridCell: FunctionComponent<Props> = ({
     );
 };
 
-const ZOOM_MAX = 5;
+const ZOOM_MAX = 0.02;
 const ZOOM_MOUSE = 0.01;
 
 function getImageZoom() {
@@ -184,7 +184,7 @@ function getImageZoom() {
         const minScale = 1 / SUBDIVISION;
         return lerp(minScale, 1, (100 + CELL_IMAGE_ZOOM) / 100);
     } else {
-        return lerp(1, ZOOM_MAX, CELL_IMAGE_ZOOM / 100);
+        return lerp(1, CELL_IMAGE_ZOOM * CELL_IMAGE_ZOOM * ZOOM_MAX, CELL_IMAGE_ZOOM / 100);
     }
 }
 function getMouseImageZoom(imageSize: number) {

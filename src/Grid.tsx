@@ -11,12 +11,12 @@ type Props = {
 };
 export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
     const [mouseTranslate, setMouseTranslation] = useState<[number, number]>([0, 0]);
-    const [gridPosition, setGridPosition] = useState([0, 0]);
     const [cellWidth, setCellWidth] = useState(0);
     const [cellHeight, setCellHeight] = useState(0);
     const [heightGrid, setHeightGrid] = useState(1);
     const [widthGrid, setWidthGrid] = useState(1);
     const [sourceDimensions, setSourceDimensions] = useState([0, 0]);
+    const [gridSize, setGridSize] = useState(canvasSize);
 
     const changeTranslate = useCallback((e) => {
         setMouseTranslation([e.pageX, e.pageY]);
@@ -53,16 +53,17 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
             case DisplayMode.GRID:
                 gridCellWidth = canvasSize[0] / SUBDIVISION;
                 gridCellHeight = (sourceDimensions[1] / sourceDimensions[0]) * gridCellWidth;
-                const gridHeight = Math.ceil(canvasSize[1] / gridCellHeight);
-                setHeightGrid(gridHeight);
+                if (gridCellHeight * SUBDIVISION < canvasSize[1]) {
+                    gridCellHeight = canvasSize[1] / SUBDIVISION;
+                    gridCellWidth = (sourceDimensions[0] / sourceDimensions[1]) * gridCellHeight;
+                }
+                setGridSize([gridCellWidth * SUBDIVISION, gridCellHeight * SUBDIVISION]);
+                setHeightGrid(SUBDIVISION);
                 setWidthGrid(SUBDIVISION);
-                const positionTop = gridCellHeight / 2 - (gridHeight * gridCellHeight - canvasSize[1]) / 2;
-                setGridPosition([gridCellWidth / 2, positionTop]);
                 break;
             case DisplayMode.ROW:
                 gridCellWidth = canvasSize[0];
                 gridCellHeight = canvasSize[1] / SUBDIVISION;
-                setGridPosition([canvasSize[0] / 2, gridCellHeight / 2]);
                 setHeightGrid(SUBDIVISION);
                 setWidthGrid(1);
 
@@ -70,7 +71,6 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
             case DisplayMode.COLUMN:
                 gridCellWidth = canvasSize[0] / SUBDIVISION;
                 gridCellHeight = canvasSize[1];
-                setGridPosition([gridCellWidth / 2, canvasSize[1] / 2]);
                 setHeightGrid(1);
                 setWidthGrid(SUBDIVISION);
 
@@ -95,7 +95,7 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
     }, [heightGrid, widthGrid]);
 
     return (
-        <Container position={[gridPosition[0], gridPosition[1]]}>
+        <Container anchor={0.5} position={[canvasSize[0] / 2, canvasSize[1] / 2]}>
             {cellWidth ? (
                 <>
                     {gridMap.map((row, y) => {
@@ -111,7 +111,16 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
                                             key={`${x}${y}`}
                                             mouseTranslate={mouseTranslate}
                                             source={source}
-                                            position={[x / row.length, y / gridMap.length]}
+                                            position={[
+                                                -gridSize[0] / 2 +
+                                                    (x / (DISPLAY === DisplayMode.ROW ? 1 : SUBDIVISION)) *
+                                                        gridSize[0] +
+                                                    cellWidth / 2,
+                                                -gridSize[1] / 2 +
+                                                    (y / (DISPLAY === DisplayMode.COLUMN ? 1 : SUBDIVISION)) *
+                                                        gridSize[1] +
+                                                    cellHeight / 2,
+                                            ]}
                                             sourceWidth={sourceDimensions[0]}
                                             sourceHeight={sourceDimensions[1]}
                                         />

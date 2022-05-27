@@ -2,7 +2,7 @@ import { Container, Text } from '@inlet/react-pixi';
 import { TextStyle } from 'pixi.js';
 import { Loader } from '@pixi/loaders';
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
-import { DISPLAY, DisplayMode, SUBDIVISION, DISORDER, STIR_FREQUENCY } from './config';
+import { DISPLAY, DisplayMode, SUBDIVISION } from './config';
 import { GridCell } from './GridCell';
 import source from './assets/source.jpg';
 
@@ -111,7 +111,6 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
                                             key={`${x}${y}`}
                                             mouseTranslate={mouseTranslate}
                                             source={source}
-                                            turbulenceTime={y + x * (DISORDER / 100) * STIR_FREQUENCY}
                                             position={[x / row.length, y / gridMap.length]}
                                             sourceWidth={sourceDimensions[0]}
                                             sourceHeight={sourceDimensions[1]}

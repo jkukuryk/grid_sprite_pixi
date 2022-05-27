@@ -1,7 +1,6 @@
 import { Container, Graphics, Sprite, useTick } from '@inlet/react-pixi';
 import { FunctionComponent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import gsap from 'gsap';
 import {
     ZOOM_RANGE_CELLS,
     SCALE_MOUSE_ZOOM,
@@ -14,6 +13,7 @@ import {
     SUBDIVISION,
     STIR_FREQUENCY_BASE_TIME,
     FLIP_CELLS,
+    DISORDER,
 } from './config';
 import { lerp } from './math';
 import { turbulence } from './turbulence';
@@ -25,7 +25,6 @@ type Props = {
     height: number;
     mouseTranslate: [number, number];
     source: string;
-    turbulenceTime: number;
     position: [number, number];
     sourceWidth: number;
     sourceHeight: number;
@@ -37,7 +36,6 @@ export const GridCell: FunctionComponent<Props> = ({
     height,
     mouseTranslate,
     source,
-    turbulenceTime,
     position,
     sourceWidth,
     sourceHeight,
@@ -60,7 +58,7 @@ export const GridCell: FunctionComponent<Props> = ({
     );
     const [scale, setScale] = useState(2);
     const [, setFrame] = useState(0);
-    const [currentScale, setCurrentScale] = useState(2);
+    const [currentScale, setCurrentScale] = useState(1);
     const baseSize = useMemo(() => {
         const ratioX = (SUBDIVISION * width) / sourceWidth;
         const ratioY = (SUBDIVISION * height) / sourceHeight;
@@ -88,6 +86,7 @@ export const GridCell: FunctionComponent<Props> = ({
 
     useTick(() => {
         mouseZoom();
+        turbulenceAnimation();
         setFrame((c) => c + 1); //keep updating
     });
 
@@ -123,8 +122,10 @@ export const GridCell: FunctionComponent<Props> = ({
     }, [height, mouseTranslate, position, sourceHeight, sourceWidth, width, x, y]);
 
     const startTime = useMemo(() => {
+        const turbulenceTime = Math.random() * STIR_FREQUENCY_BASE_TIME * 1000 * (DISORDER / 100);
+        console.log('turbulenceTime', turbulenceTime);
         return Date.now() - turbulenceTime;
-    }, [turbulenceTime]);
+    }, []);
     const anchor = useMemo(() => {
         if (anchorScale < 0) {
             const anchorTranslateX = lerp(anchorBase[0], 0.5, anchorScale / -100);
@@ -134,29 +135,22 @@ export const GridCell: FunctionComponent<Props> = ({
             return anchorBase;
         }
     }, [anchorBase, anchorScale]);
-    const [turbulenceForce, setTurbulenceForce] = useState({ x: anchor[0], y: anchor[1] });
+    const [turbulenceAnchor, setTurbulenceAnchor] = useState([anchor[0], anchor[1]]);
 
-    const nextTranslation = useCallback(() => {
-        if (STIR_FREQUENCY >= 0) {
-            const turbulenceStepTime = ((100 - STIR_FREQUENCY) / 100) * (STIR_FREQUENCY_BASE_TIME * 1000);
-            const currentTime = Date.now() - startTime;
-            const targetStep = Math.ceil(currentTime / turbulenceStepTime) % turbulence.length;
-            const diffTime = currentTime % turbulenceStepTime;
-            gsap.to(turbulenceForce, {
-                duration: (turbulenceStepTime - diffTime) / 1000,
-                ease: 'power1.inOut',
-                x: lerp(anchor[0], 1 - anchor[0], turbulence[targetStep][0] * (STIR_STRENGTH / 100)),
-                y: lerp(anchor[1], 1 - anchor[1], turbulence[targetStep][1] * (STIR_STRENGTH / 100)),
-            }).then(nextTranslation);
-        } else {
-            setTimeout(nextTranslation, 1000);
-            setTurbulenceForce({ x: anchor[0], y: anchor[1] });
-        }
-    }, [anchor, startTime, turbulenceForce]);
-    useEffect(() => {
-        nextTranslation();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    const turbulenceAnimation = useCallback(() => {
+        const currentTime = Date.now() - startTime;
+        const turbulenceStepTime = lerp(STIR_FREQUENCY_BASE_TIME * 1000, 100, STIR_FREQUENCY / 100);
+        const currentStep = Math.floor(currentTime / turbulenceStepTime) % turbulence.length;
+        const targetStep = currentStep + 1 === turbulence.length ? 0 : currentStep + 1;
+        const diffTime = currentTime % turbulenceStepTime;
+
+        const stepX = lerp(turbulence[currentStep][0], turbulence[targetStep][0], diffTime / turbulenceStepTime);
+        const stepY = lerp(turbulence[currentStep][1], turbulence[targetStep][1], diffTime / turbulenceStepTime);
+
+        const strengthX = (stepX * STIR_STRENGTH) / 100;
+        const strengthY = (stepY * STIR_STRENGTH) / 100;
+        setTurbulenceAnchor([lerp(anchor[0], 1 - anchor[0], strengthX), lerp(anchor[1], 1 - anchor[1], strengthY)]);
+    }, [anchor, startTime]);
 
     const flipX = useMemo(() => {
         if (x % 2 !== 0 && FLIP_CELLS) {
@@ -174,7 +168,7 @@ export const GridCell: FunctionComponent<Props> = ({
             <Graphics name="mask" draw={draw} ref={maskRef} />
             <Sprite
                 image={source}
-                anchor={[turbulenceForce.x, turbulenceForce.y]}
+                anchor={[turbulenceAnchor[0], turbulenceAnchor[1]]}
                 width={baseSize[0] * (DISPLAY === DisplayMode.ROW ? 1 : currentScale)}
                 height={baseSize[1] * (DISPLAY === DisplayMode.COLUMN ? 1 : currentScale)}
             />

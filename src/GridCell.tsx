@@ -107,14 +107,11 @@ export const GridCell: FunctionComponent<Props> = ({
 
     useEffect(() => {
         const trX = mouseTranslate[0];
-        const positionX = x * width + width / 2;
-        const rangeX = Math.abs(positionX - trX);
-
+        const cellX = trX / width;
         const trY = mouseTranslate[1];
-        const positionY = y * height + height / 2;
-        const rangeY = Math.abs(positionY - trY);
-        const cellsRangeY = Math.max(ZOOM_RANGE_CELLS - rangeY / height, 0) / ZOOM_RANGE_CELLS;
-        const cellsRangeX = Math.max(ZOOM_RANGE_CELLS - rangeX / width, 0) / ZOOM_RANGE_CELLS;
+        const cellY = trY / height;
+        const cellsRangeX = Math.max(ZOOM_RANGE_CELLS - Math.abs(cellX - x), 0) / ZOOM_RANGE_CELLS;
+        const cellsRangeY = Math.max(ZOOM_RANGE_CELLS - -Math.abs(cellY - y), 0) / ZOOM_RANGE_CELLS;
         const cellsRange = Math.max(cellsRangeY * cellsRangeX);
         const imageZoom = getImageZoom();
 
@@ -134,7 +131,7 @@ export const GridCell: FunctionComponent<Props> = ({
                 setScale(scalePrcR);
                 break;
         }
-    }, [height, mouseTranslate, width, x, y]);
+    }, [height, mouseTranslate, sourceHeight, width, x, y]);
 
     const startTime = useMemo(() => {
         const turbulenceTime = Math.random() * STIR_FREQUENCY_BASE_TIME * 1000 * (DISORDER / 100);
@@ -186,21 +183,35 @@ export const GridCell: FunctionComponent<Props> = ({
             case DisplayMode.ROW:
                 const heightSource = (sourceHeight / sourceWidth) * width;
                 const positionY = lerp(heightSource / 2 - height / 2, -heightSource / 2 + height / 2, y / SUBDIVISION);
-                return [0, positionY];
+                const zoomPositionRow = lerp(0, positionY, Math.min(0, CELL_IMAGE_ZOOM / 100));
+                return [0, zoomPositionRow];
             case DisplayMode.COLUMN:
                 const widthSource = (sourceWidth / sourceHeight) * height;
                 const positionX = lerp(widthSource / 2 - width / 2, -widthSource / 2 + width / 2, x / SUBDIVISION);
-                return [positionX, 0];
+                const zoomPositionColumn = lerp(0, positionX, Math.min(0, CELL_IMAGE_ZOOM / 100));
+                return [zoomPositionColumn, 0];
         }
     }, [height, sourceHeight, sourceWidth, width, x, y]);
+
+    const imageSize = useMemo(() => {
+        switch (DISPLAY) {
+            case DisplayMode.GRID:
+                return [baseSize[0] * currentScale, baseSize[1] * currentScale];
+            case DisplayMode.ROW:
+                return [width, height * currentScale * SUBDIVISION];
+            case DisplayMode.COLUMN:
+                console.log('currentScale', currentScale);
+                return [width * currentScale * SUBDIVISION, height];
+        }
+    }, [baseSize, currentScale, height, width]);
     return (
         <Container mask={maskRef?.current} position={[position[0], position[1]]} scale={[flipX, flipY]}>
             <Graphics name="mask" draw={draw} ref={maskRef} />
             <Sprite
                 image={source}
                 anchor={[turbulenceAnchor[0], turbulenceAnchor[1]]}
-                width={DISPLAY === DisplayMode.ROW ? width : baseSize[0] * currentScale}
-                height={DISPLAY === DisplayMode.COLUMN ? height : baseSize[1] * currentScale}
+                width={imageSize[0]}
+                height={imageSize[1]}
                 position={[spritePosition[0], spritePosition[1]]}
             />
             {/* <Graphics name="debug" draw={drawDebug} /> */}

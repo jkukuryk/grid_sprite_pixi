@@ -107,12 +107,12 @@ export const GridCell: FunctionComponent<Props> = ({
 
     useEffect(() => {
         const trX = mouseTranslate[0];
-        const cellX = trX / width;
+        const cellX = trX / width - 0.5;
         const trY = mouseTranslate[1];
-        const cellY = trY / height;
+        const cellY = trY / height - 0.5;
         const cellsRangeX = Math.max(ZOOM_RANGE_CELLS - Math.abs(cellX - x), 0) / ZOOM_RANGE_CELLS;
-        const cellsRangeY = Math.max(ZOOM_RANGE_CELLS - -Math.abs(cellY - y), 0) / ZOOM_RANGE_CELLS;
-        const cellsRange = Math.max(cellsRangeY * cellsRangeX);
+        const cellsRangeY = Math.max(ZOOM_RANGE_CELLS - Math.abs(cellY - y), 0) / ZOOM_RANGE_CELLS;
+        const cellsRange = cellsRangeY * cellsRangeX;
         const imageZoom = getImageZoom();
 
         setAnchorScale(lerp(CELL_IMAGE_ZOOM, SCALE_MOUSE_ZOOM, cellsRange));

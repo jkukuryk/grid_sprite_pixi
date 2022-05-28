@@ -56,6 +56,20 @@ export const GridCell: FunctionComponent<Props> = ({
         },
         [height, width]
     );
+    const drawDebug = useCallback(
+        (g) => {
+            const w = width / 2;
+            const h = height / 2;
+            g.clear();
+            g.lineStyle(3, 0x900000, 5);
+            g.moveTo(-w, -h);
+            g.lineTo(-w, h);
+            g.lineTo(w, h);
+            g.lineTo(w, -h);
+            g.lineTo(-w, -h);
+        },
+        [height, width]
+    );
     const [scale, setScale] = useState(1);
     const [, setFrame] = useState(0);
     const [currentScale, setCurrentScale] = useState(1);
@@ -67,19 +81,12 @@ export const GridCell: FunctionComponent<Props> = ({
     }, [height, sourceHeight, sourceWidth, width]);
 
     const anchorBase = useMemo(() => {
-        switch (DISPLAY) {
-            case DisplayMode.GRID:
-                const range = 1 / SUBDIVISION;
+        const range = 1 / SUBDIVISION;
 
-                const anchorX = x * range + range / 2;
-                const anchorY = y * range + range / 2;
-                return [anchorX, anchorY];
-            case DisplayMode.ROW:
-                return [0.5, lerp(0.2, 0.8, y / SUBDIVISION)];
-            case DisplayMode.COLUMN:
-                return [lerp(0.2, 0.8, x / SUBDIVISION), 0.5];
-        }
-    }, [x, y, scale]);
+        const anchorX = x * range + range / 2;
+        const anchorY = y * range + range / 2;
+        return [anchorX, anchorY];
+    }, [x, y]);
     const [anchorScale, setAnchorScale] = useState(1);
     const mouseZoom = useCallback(() => {
         const speed = lerp(0.000001, 1, ZOOM_SPEED / 100);
@@ -120,18 +127,17 @@ export const GridCell: FunctionComponent<Props> = ({
                 break;
             case DisplayMode.COLUMN:
                 const scalePrcC = lerp(imageZoom, mouseZoom, cellsRangeX);
-                setScale(scalePrcC / SUBDIVISION);
+                setScale(scalePrcC);
                 break;
             case DisplayMode.ROW:
                 const scalePrcR = lerp(imageZoom, mouseZoom, cellsRangeY);
-                setScale(scalePrcR / SUBDIVISION);
+                setScale(scalePrcR);
                 break;
         }
     }, [height, mouseTranslate, width, x, y]);
 
     const startTime = useMemo(() => {
         const turbulenceTime = Math.random() * STIR_FREQUENCY_BASE_TIME * 1000 * (DISORDER / 100);
-        console.log('turbulenceTime', turbulenceTime);
         return Date.now() - turbulenceTime;
     }, []);
     const anchor = useMemo(() => {
@@ -173,16 +179,31 @@ export const GridCell: FunctionComponent<Props> = ({
             return -1;
         } else return 1;
     }, [y]);
-
+    const spritePosition = useMemo(() => {
+        switch (DISPLAY) {
+            case DisplayMode.GRID:
+                return [0, 0];
+            case DisplayMode.ROW:
+                const heightSource = (sourceHeight / sourceWidth) * width;
+                const positionY = lerp(heightSource / 2 - height / 2, -heightSource / 2 + height / 2, y / SUBDIVISION);
+                return [0, positionY];
+            case DisplayMode.COLUMN:
+                const widthSource = (sourceWidth / sourceHeight) * height;
+                const positionX = lerp(widthSource / 2 - width / 2, -widthSource / 2 + width / 2, x / SUBDIVISION);
+                return [positionX, 0];
+        }
+    }, [height, sourceHeight, sourceWidth, width, x, y]);
     return (
         <Container mask={maskRef?.current} position={[position[0], position[1]]} scale={[flipX, flipY]}>
             <Graphics name="mask" draw={draw} ref={maskRef} />
             <Sprite
                 image={source}
                 anchor={[turbulenceAnchor[0], turbulenceAnchor[1]]}
-                width={baseSize[0] * currentScale}
-                height={baseSize[1] * currentScale}
+                width={DISPLAY === DisplayMode.ROW ? width : baseSize[0] * currentScale}
+                height={DISPLAY === DisplayMode.COLUMN ? height : baseSize[1] * currentScale}
+                position={[spritePosition[0], spritePosition[1]]}
             />
+            {/* <Graphics name="debug" draw={drawDebug} /> */}
         </Container>
     );
 };

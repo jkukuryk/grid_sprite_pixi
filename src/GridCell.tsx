@@ -113,7 +113,7 @@ export const GridCell: FunctionComponent<Props> = ({
         const b = Math.abs(trY - height * y - height / 2);
 
         const imageZoom = getImageZoom();
-        const mouseZoom = getMouseImageZoom(imageZoom);
+        const mouseZoom = getMouseImageZoom();
 
         switch (DISPLAY) {
             case DisplayMode.GRID:
@@ -228,22 +228,19 @@ export const GridCell: FunctionComponent<Props> = ({
     );
 };
 
-const ZOOM_MAX = 0.02;
-const ZOOM_MOUSE = 0.01;
-
 function getImageZoom() {
     if (CELL_IMAGE_ZOOM <= 0) {
         const minScale = 1 / SUBDIVISION;
         return lerp(minScale, 1, (100 + CELL_IMAGE_ZOOM) / 100);
     } else {
-        return lerp(1, CELL_IMAGE_ZOOM * CELL_IMAGE_ZOOM * ZOOM_MAX, CELL_IMAGE_ZOOM / 100);
+        return lerp(1, CELL_IMAGE_ZOOM, CELL_IMAGE_ZOOM / 100);
     }
 }
-function getMouseImageZoom(imageSize: number) {
+function getMouseImageZoom() {
     if (SCALE_MOUSE_ZOOM <= 0) {
         const minScale = 1 / SUBDIVISION;
         return lerp(minScale, 1, (100 + SCALE_MOUSE_ZOOM) / 100);
     } else {
-        return lerp(1, SCALE_MOUSE_ZOOM * SCALE_MOUSE_ZOOM * ZOOM_MOUSE, SCALE_MOUSE_ZOOM / 100);
+        return lerp(1, SCALE_MOUSE_ZOOM, SCALE_MOUSE_ZOOM / 100);
     }
 }

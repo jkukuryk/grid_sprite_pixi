@@ -109,8 +109,8 @@ export const GridCell: FunctionComponent<Props> = ({
         const trX = mouseTranslate[0];
         const trY = mouseTranslate[1];
 
-        const a = Math.abs(trX - width * x);
-        const b = Math.abs(trY - height * y);
+        const a = Math.abs(trX - width * x - width / 2);
+        const b = Math.abs(trY - height * y - height / 2);
 
         const imageZoom = getImageZoom();
         const mouseZoom = getMouseImageZoom(imageZoom);

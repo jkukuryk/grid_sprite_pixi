@@ -106,28 +106,32 @@ export const GridCell: FunctionComponent<Props> = ({
     });
 
     useEffect(() => {
+        const radius = ZOOM_RANGE_CELLS * Math.max(width, height);
         const trX = mouseTranslate[0];
-        const cellX = trX / width - 0.5;
         const trY = mouseTranslate[1];
-        const cellY = trY / height - 0.5;
-        const cellsRangeX = Math.max(ZOOM_RANGE_CELLS - Math.abs(cellX - x), 0) / ZOOM_RANGE_CELLS;
-        const cellsRangeY = Math.max(ZOOM_RANGE_CELLS - Math.abs(cellY - y), 0) / ZOOM_RANGE_CELLS;
-        const cellsRange = cellsRangeY * cellsRangeX;
-        const imageZoom = getImageZoom();
 
+        const a = Math.abs(trX - width * x);
+        const b = Math.abs(trY - height * y);
+
+        const cellsRangeX = Math.min(a, radius);
+        const cellsRangeY = Math.min(b, radius);
+        let cellsRange = 0;
+        const imageZoom = getImageZoom();
+        cellsRange = 1 - Math.sqrt(a * a + b * b) / radius;
         setAnchorScale(lerp(CELL_IMAGE_ZOOM, SCALE_MOUSE_ZOOM, cellsRange));
         const mouseZoom = getMouseImageZoom(imageZoom);
+
         switch (DISPLAY) {
             case DisplayMode.GRID:
                 const scalePrcG = lerp(imageZoom, mouseZoom, cellsRange);
                 setScale(scalePrcG);
                 break;
             case DisplayMode.COLUMN:
-                const scalePrcC = lerp(imageZoom, mouseZoom, cellsRangeX);
+                const scalePrcC = lerp(mouseZoom, imageZoom, cellsRangeX / radius);
                 setScale(scalePrcC);
                 break;
             case DisplayMode.ROW:
-                const scalePrcR = lerp(imageZoom, mouseZoom, cellsRangeY);
+                const scalePrcR = lerp(mouseZoom, imageZoom, cellsRangeY / radius);
                 setScale(scalePrcR);
                 break;
         }

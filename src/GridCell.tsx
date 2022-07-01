@@ -17,6 +17,7 @@ import {
 } from './config';
 import { lerp } from './math';
 import { turbulence } from './turbulence';
+const minScale = 1 / SUBDIVISION;
 
 type Props = {
     x: number;
@@ -56,20 +57,20 @@ export const GridCell: FunctionComponent<Props> = ({
         },
         [height, width]
     );
-    const drawDebug = useCallback(
-        (g) => {
-            const w = width / 2;
-            const h = height / 2;
-            g.clear();
-            g.lineStyle(3, 0x900000, 5);
-            g.moveTo(-w, -h);
-            g.lineTo(-w, h);
-            g.lineTo(w, h);
-            g.lineTo(w, -h);
-            g.lineTo(-w, -h);
-        },
-        [height, width]
-    );
+    // const drawDebug = useCallback(
+    //     (g) => {
+    //         const w = width / 2;
+    //         const h = height / 2;
+    //         g.clear();
+    //         g.lineStyle(3, 0x900000, 5);
+    //         g.moveTo(-w, -h);
+    //         g.lineTo(-w, h);
+    //         g.lineTo(w, h);
+    //         g.lineTo(w, -h);
+    //         g.lineTo(-w, -h);
+    //     },
+    //     [height, width]
+    // );
     const [scale, setScale] = useState(1);
     const [, setFrame] = useState(0);
     const [currentScale, setCurrentScale] = useState(1);
@@ -109,18 +110,21 @@ export const GridCell: FunctionComponent<Props> = ({
         const trX = mouseTranslate[0];
         const trY = mouseTranslate[1];
 
-        const a = Math.abs(trX - width * x - width / 2);
-        const b = Math.abs(trY - height * y - height / 2);
+        const a = Math.abs(trX - position[0]);
+        const b = Math.abs(trY - position[1]);
 
         const imageZoom = getImageZoom();
         const mouseZoom = getMouseImageZoom();
 
         switch (DISPLAY) {
             case DisplayMode.GRID:
-                let gridRadius = ZOOM_RANGE_CELLS * Math.max(width, height);
-                const cellsRange = 1 - Math.sqrt(a * a + b * b) / gridRadius;
-                setAnchorScale(lerp(CELL_IMAGE_ZOOM, SCALE_MOUSE_ZOOM, cellsRange));
-                const scalePrcG = lerp(imageZoom, mouseZoom, cellsRange);
+                let gridRadius = ZOOM_RANGE_CELLS * Math.max(width, height); //size of cell
+                const cellsRange = Math.sqrt(a * a + b * b) / gridRadius;
+                setAnchorScale(lerp(SCALE_MOUSE_ZOOM, CELL_IMAGE_ZOOM, cellsRange));
+                let scalePrcG = lerp(mouseZoom, imageZoom, cellsRange);
+                if (scalePrcG > 1) {
+                    scalePrcG = scalePrcG * scalePrcG * 50;
+                }
                 setScale(scalePrcG);
                 break;
             case DisplayMode.COLUMN:
@@ -140,7 +144,7 @@ export const GridCell: FunctionComponent<Props> = ({
                 setScale(scalePrcR);
                 break;
         }
-    }, [height, mouseTranslate, sourceHeight, width, x, y]);
+    }, [height, mouseTranslate, position, sourceHeight, width, x, y]);
 
     const startTime = useMemo(() => {
         const turbulenceTime = Math.random() * STIR_FREQUENCY_BASE_TIME * 1000 * (DISORDER / 100);
@@ -203,13 +207,17 @@ export const GridCell: FunctionComponent<Props> = ({
     }, [height, sourceHeight, sourceWidth, width, x, y]);
 
     const imageSize = useMemo(() => {
+        const MAX_SCALE = 100;
+
         switch (DISPLAY) {
             case DisplayMode.GRID:
-                return [baseSize[0] * currentScale, baseSize[1] * currentScale];
+                return [
+                    baseSize[0] * Math.sin(((Math.PI / 2) * currentScale) / 100) * MAX_SCALE,
+                    baseSize[1] * Math.sin(((Math.PI / 2) * currentScale) / 100) * MAX_SCALE,
+                ];
             case DisplayMode.ROW:
                 return [width, height * currentScale * SUBDIVISION];
             case DisplayMode.COLUMN:
-                console.log('currentScale', currentScale);
                 return [width * currentScale * SUBDIVISION, height];
         }
     }, [baseSize, currentScale, height, width]);
@@ -230,17 +238,16 @@ export const GridCell: FunctionComponent<Props> = ({
 
 function getImageZoom() {
     if (CELL_IMAGE_ZOOM <= 0) {
-        const minScale = 1 / SUBDIVISION;
-        return lerp(minScale, 1, (100 + CELL_IMAGE_ZOOM) / 100);
+        return lerp(1, minScale, (CELL_IMAGE_ZOOM * -1) / 100);
     } else {
-        return lerp(1, CELL_IMAGE_ZOOM, CELL_IMAGE_ZOOM / 100);
+        return lerp(1, 1 + minScale, CELL_IMAGE_ZOOM / 100);
     }
 }
 function getMouseImageZoom() {
     if (SCALE_MOUSE_ZOOM <= 0) {
         const minScale = 1 / SUBDIVISION;
-        return lerp(minScale, 1, (100 + SCALE_MOUSE_ZOOM) / 100);
+        return lerp(1, minScale, (SCALE_MOUSE_ZOOM * -1) / 100);
     } else {
-        return lerp(1, SCALE_MOUSE_ZOOM, SCALE_MOUSE_ZOOM / 100);
+        return lerp(1, 1 + minScale, SCALE_MOUSE_ZOOM / 100);
     }
 }

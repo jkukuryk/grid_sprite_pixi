@@ -111,22 +111,20 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
                                             -gridSize[1] / 2 + (y / SUBDIVISION) * gridSize[1] + cellHeight / 2,
                                         ];
                                         translate = [
-                                            (mouseTranslate[0] / canvasSize[0]) * gridSize[0],
-                                            (mouseTranslate[1] / canvasSize[1]) * gridSize[1],
+                                            mouseTranslate[0] - canvasSize[0] / 2,
+                                            mouseTranslate[1] - canvasSize[1] / 2,
                                         ];
                                     }
 
                                     if (DISPLAY === DisplayMode.ROW) {
                                         position[0] = 0;
-                                        position[1] =
-                                            -canvasSize[1] / 2 + (y / SUBDIVISION) * canvasSize[1] + cellHeight / 2;
+                                        position[1] = mouseTranslate[1] - canvasSize[1] / 2;
                                         translate = [...mouseTranslate];
                                     }
 
                                     if (DISPLAY === DisplayMode.COLUMN) {
                                         position[1] = 0;
-                                        position[0] =
-                                            -canvasSize[0] / 2 + (x / SUBDIVISION) * canvasSize[0] + cellWidth / 2;
+                                        position[0] = mouseTranslate[0] - canvasSize[0] / 2;
                                         translate = [...mouseTranslate];
                                     }
 

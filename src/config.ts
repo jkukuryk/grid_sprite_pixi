@@ -1,8 +1,8 @@
-export const SUBDIVISION = 16;
+export const SUBDIVISION = 12;
 
 export const CELL_IMAGE_ZOOM = 100; //-100 - 100
 export const SCALE_MOUSE_ZOOM = -100; //-100 - 100
-export const ZOOM_RANGE_CELLS = 16;
+export const ZOOM_RANGE_CELLS = 5;
 
 export const STIR_FREQUENCY = 45; //0-100
 export const STIR_FREQUENCY_BASE_TIME = 4; //seconds

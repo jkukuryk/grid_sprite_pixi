@@ -2,14 +2,15 @@ import { Container, Text } from '@inlet/react-pixi';
 import { TextStyle } from 'pixi.js';
 import { Loader } from '@pixi/loaders';
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
-import { DISPLAY, DisplayMode, SUBDIVISION } from './config';
+import { DisplayMode, SUBDIVISION } from './config';
 import { GridCell } from './GridCell';
 import source from './assets/source.jpg';
 
 type Props = {
     canvasSize: [number, number];
+    displayMode: DisplayMode;
 };
-export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
+export const Grid: FunctionComponent<Props> = ({ canvasSize, displayMode }) => {
     const [mouseTranslate, setMouseTranslation] = useState<[number, number]>([0, 0]);
     const [cellWidth, setCellWidth] = useState(0);
     const [cellHeight, setCellHeight] = useState(0);
@@ -49,7 +50,7 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
     useEffect(() => {
         let gridCellWidth = 0;
         let gridCellHeight = 0;
-        switch (DISPLAY) {
+        switch (displayMode) {
             case DisplayMode.GRID:
                 gridCellWidth = canvasSize[0] / SUBDIVISION;
                 gridCellHeight = (sourceDimensions[1] / sourceDimensions[0]) * gridCellWidth;
@@ -79,7 +80,7 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
 
         setCellWidth(gridCellWidth);
         setCellHeight(gridCellHeight);
-    }, [canvasSize, heightGrid, sourceDimensions]);
+    }, [canvasSize, heightGrid, sourceDimensions, displayMode]);
 
     const gridMap = useMemo(() => {
         const gridList = [] as number[][];
@@ -105,7 +106,7 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
                                     let position = [0, 0];
                                     let translate = [0, 0];
 
-                                    if (DISPLAY === DisplayMode.GRID) {
+                                    if (displayMode === DisplayMode.GRID) {
                                         position = [
                                             -gridSize[0] / 2 + (x / SUBDIVISION) * gridSize[0] + cellWidth / 2,
                                             -gridSize[1] / 2 + (y / SUBDIVISION) * gridSize[1] + cellHeight / 2,
@@ -116,13 +117,13 @@ export const Grid: FunctionComponent<Props> = ({ canvasSize }) => {
                                         ];
                                     }
 
-                                    if (DISPLAY === DisplayMode.ROW) {
+                                    if (displayMode === DisplayMode.ROW) {
                                         position[0] = 0;
                                         position[1] = mouseTranslate[1] - canvasSize[1] / 2;
                                         translate = [...mouseTranslate];
                                     }
 
-                                    if (DISPLAY === DisplayMode.COLUMN) {
+                                    if (displayMode === DisplayMode.COLUMN) {
                                         position[1] = 0;
                                         position[0] = mouseTranslate[0] - canvasSize[0] / 2;
                                         translate = [...mouseTranslate];
